@@ -4,7 +4,7 @@ tools=`ls $TOOLS_DIR`
 echo ""
 echo "Start testing..."
 echo ""
-        
+
 for tool in $tools; do
     TEST_DIR=$BASE_DIR/tests/$tool
     TEST_FILES=`ls $TEST_DIR`
