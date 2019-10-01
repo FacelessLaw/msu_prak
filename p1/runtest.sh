@@ -2,7 +2,7 @@ BASE_DIR=`pwd`
 echo ""
 echo "Start testing..."
 echo ""
-TEST_DIR=$BASE_DIR/tests/$tool
+TEST_DIR=$BASE_DIR/tests
 TEST_FILES=`ls $TEST_DIR`
 for filename in $TEST_FILES; do
     echo "#####################################################"
@@ -18,3 +18,4 @@ for filename in $TEST_FILES; do
     echo "------------"
 done
 
+rm pBash pMy
