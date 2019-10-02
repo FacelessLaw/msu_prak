@@ -55,6 +55,7 @@ int main() {
             ++is;
         }
     }
+    ia += (ls != 0);
     int i;
     for (i = 0; i < ia; ++i) {
         int j;

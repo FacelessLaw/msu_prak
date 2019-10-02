@@ -5,7 +5,9 @@ echo ""
 TEST_DIR=$BASE_DIR/tests
 TEST_FILES=`ls $TEST_DIR`
 for filename in $TEST_FILES; do
-    echo "#####################################################"
+    echo ""
+    echo "#######################################################################"
+    echo ""
     echo "For $TEST_DIR/$filename"
     sort $TEST_DIR/$filename > pBash
     valgrind --log-file=log --leak-check=full -v cat $TEST_DIR/$filename | ./m > pMy
@@ -18,10 +20,13 @@ for filename in $TEST_FILES; do
     echo "------------"
     echo ""
     echo "***********************"
-    echo "------------"
+    echo "--------------------"
     echo "| valgrind:result  |"
-    echo "------------"
+    echo "--------------------"
     tail -2 ./log
 done
-
+echo ""
+echo "#######################################################################"
+echo ""
+    
 rm pBash pMy log
