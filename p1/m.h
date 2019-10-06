@@ -17,17 +17,17 @@ allocate(void *source, int curr_it, int *last_it, int size_of_block) {
     return res;
 }
 
-char **
-add_string(char **source, int curr_it, int *last_it) {
-    char **res = (char **) allocate(source, curr_it, last_it, sizeof(*source));
-    res[curr_it] = NULL;
-    return res;
-}
-
 char *
 add_char(char *source, int symb, int curr_it, int *last_it) {
     char *res = (char *) allocate(source, curr_it, last_it, sizeof(*res));
     res[curr_it] = symb;
     res[curr_it + 1] = '\0';
+    return res;
+}
+
+char **
+add_string(char **source, int curr_it, int *last_it) {
+    char **res = (char **) allocate(source, curr_it, last_it, sizeof(*source));
+    res[curr_it] = NULL;
     return res;
 }
