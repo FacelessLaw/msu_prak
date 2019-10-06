@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc.h>
 #include <ctype.h>
 #include <string.h>
 
-void * loc(void *a, int ia, int *la, int sizeVal) {
+void * 
+loc(void *a, int ia, int *la, int sizeVal) {
     void * res = a;
     if (ia + 1 >= *la) {
         int ns = (*la) * 2;
@@ -13,7 +13,7 @@ void * loc(void *a, int ia, int *la, int sizeVal) {
         }
         res = (void *) realloc(a, ns * sizeVal);
         if (!res) {
-            fprintf(stderr, "Mem limit");
+            fprintf(stderr, "Memory limit");
             exit(1);
         }
         *la = ns;
@@ -21,20 +21,23 @@ void * loc(void *a, int ia, int *la, int sizeVal) {
     return res;
 }
 
-char ** addStr(char **a, int ia, int *la) {
+char **
+addStr(char **a, int ia, int *la) {
     char ** res = (char **) loc(a, ia, la, sizeof(*a));
     res[ia] = NULL;
     return res;
 }
 
-char * addCh(char *s, int ch, int is, int *ls) {
+char *
+addCh(char *s, int ch, int is, int *ls) {
     char * res = loc(s, is, ls, sizeof(*res));
     res[is] = ch;
     res[is + 1] = '\0';
     return res;
 }
 
-int main() {
+int
+main(void) {
     char ** a = NULL;
     int la = 0;
     int ia = 0;
