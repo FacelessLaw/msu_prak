@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "m.h"
+#include "func.h"
 
 int
 main(void) {
@@ -15,7 +15,7 @@ main(void) {
     while ((ch = getchar()) != EOF) {
         if (ch == '\n') { //in case we got full new string
             if (curr_last_it == 0) {
-                text[absolute_it] = add_char(text[absolute_it], '\0', curr_it, &absolute_last_it);
+                text[absolute_it] = add_char(text[absolute_it], '\0', curr_it, &curr_last_it);
             }
             ++absolute_it;
             text = add_string(text, absolute_it, &absolute_last_it);
