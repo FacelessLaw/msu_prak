@@ -14,7 +14,10 @@
 - необходимо иметь краткую инструкцию работы с программой (описание способа работы с библиотекой и ее возможностей).
 
 
+```bash
 ./runtests.sh 
+```
+
 собирает проект
 проходится по всем файлам внутри пакпи tests и направляет их на вход программе
 Помимо этого выводится финальный результат работы valgrind-а(последние две строчки с кол-вом ошибок)
@@ -28,32 +31,35 @@
 
 Функции библиотеки:
 
+```cpp
 void Add(double **a, double **b);
-a += b
+//a += b
 
 void Mul(double **a, double **b, double **res);
-res = a * b
+//res = a * b
 
 void Muld(double **a, double x);
-a *= x
+//a *= x
 
 double Det(double **a, int len);
-|a|
+//|a|
 
 void Print(double **a, int len);
-Печать
+//Печать
 
 void Input(double **a, int len);
-Вывод
+//Вывод
 
 void SetMinor(double **a, double **p, int ci, int cj, int len);
-Записывает в p минор а без i-й строки и j-го столбца
+//Записывает в p минор а без i-й строки и j-го столбца
 
 void Delete(double **a, int len);
-Освобождает память для матрицы а размера len
+//Освобождает память для матрицы а размера len
 
 double ** Create(double len);
-Выделяет память для матрицы размера lenXlen
+//Выделяет память для матрицы размера lenXlen
 
 void Copy(double ** to, double ** from);
-Копирует содержимое матрицы from в матрицу to
+//Копирует содержимое матрицы from в матрицу to
+
+```
