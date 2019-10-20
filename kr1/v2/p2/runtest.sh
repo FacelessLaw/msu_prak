@@ -12,13 +12,13 @@ for filename in $TEST_FILES; do
     echo "#######################################################################"
     echo ""
     echo "For $TEST_DIR/$filename"
-    valgrind --log-file=log --leak-check=full -v cat $TEST_DIR/$filename | ./m > pMy
+    valgrind --log-file=log --leak-check=full -v ./m $TEST_DIR/$filename $filename 228
     echo "------------"
-    echo "| resBegin |"
+    echo "| diffBegin |"
     echo "------------"
-    cat pMy
+    diff -u $TEST_DIR/$filename $filename
     echo "------------"
-    echo "| resEnd   |"
+    echo "| diffEnd   |"
     echo "------------"
     echo ""
     echo "***********************"
@@ -26,6 +26,7 @@ for filename in $TEST_FILES; do
     echo "| valgrind:result  |"
     echo "--------------------"
     tail -2 ./log
+    rm $filename
 done
 echo ""
 echo "#######################################################################"
