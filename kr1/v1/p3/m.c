@@ -5,7 +5,7 @@
 typedef struct tree * ptree;
 
 struct tree{
-    int key, h;
+    int key;
     ptree l, r;
 };
 
