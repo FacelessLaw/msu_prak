@@ -16,6 +16,9 @@ char *readStr(FILE *fr) {
     char *s = (char *) realloc(NULL, sizeof(*s) * sz);
     s[0] = 0;
     while (fgets(s + strlen(s), sz - strlen(s), fr)) {
+        if (s[strlen(s) - 1] == '\n') {
+            return s;
+        }
         sz *= 2;
         s = realloc(s, sz);
     }
