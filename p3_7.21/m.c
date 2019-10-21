@@ -26,7 +26,7 @@ ptree insert(ptree root, char *key) {
     }
     if (strcmp(root->key, key) > 0) {
         root->l = insert(root->l, key);
-    } else if (root->key < key) {
+    } else if (strcmp(root->key, key) < 0)  {
         root->r = insert(root->r, key);
     } else {
         root->cnt++;
@@ -116,8 +116,8 @@ int main(int argc, char *argv[]) {
     int cnt = 0;
     char * resStr = findMax(root, &cnt);
     
-    printf("%s\n", resStr);
-    print(root);
+    printf(" CNT::%d \n STR::%s\n", cnt, resStr);
+    //print(root);
     free_tree(root);
     return 0;
 }

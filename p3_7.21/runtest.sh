@@ -12,13 +12,26 @@ for filename in $TEST_FILES; do
     echo "#######################################################################"
     echo ""
     echo "For $TEST_DIR/$filename"
+    
+    echo "------------"
+    echo "| fileBegin |"
+    echo "------------"
+    echo ""
+    cat $TEST_DIR/$filename
+    echo ""
+    echo "------------"
+    echo "| fileEnd   |"
+    echo "------------"
+    echo ""
+    echo "*****************************"
+    
     valgrind --log-file=log --leak-check=full -v ./m $TEST_DIR/$filename > pMy
     echo "------------"
-    echo "| diffBegin |"
+    echo "| resBegin |"
     echo "------------"
     cat pMy
     echo "------------"
-    echo "| diffEnd   |"
+    echo "| resEnd   |"
     echo "------------"
     echo ""
     echo "***********************"
