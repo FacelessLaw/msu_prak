@@ -1,14 +1,15 @@
 #include <stdio.h>
-#include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <limits.h>
+
+#include "tools/list/list.h"
+#include "tools/cmdline/cmdline.h"
+
 
 enum {
     ARG_MAX = 2097152,
     ARG_CNT = 2,
-    A_FILE_R = 1,
+    A_FILE_R = 1
 };
 
 char CMD_SEP[10] = " \n";
@@ -60,9 +61,17 @@ parseWords(char * cmd) {
     return res;
 }
 
+void TEST_LIST() {
+    plist root = NULL;
+    root = add_word(root, "garik");
+    root = add_word(root, "sharik");
+    print_list(root);
+    delete_list(root);
+}
+
 int 
 main(int argc, char *argv[]) {
-    if (argc != ARG_CNT) {
+    /*if (argc != ARG_CNT) {
         fprintf(stderr, "I need %d args\n", ARG_CNT);
         return 1; 
     }
@@ -80,5 +89,24 @@ main(int argc, char *argv[]) {
     }
     free(str);
     free(cmdWords);
+    */
+    
+    
+    /*
+    TEST_LIST();
+    */
+    printf("Djarvis ~> ");
+    plist root = NULL;
+    char * word = NULL;
+    int contRead = 1;
+    while (word = read_word(&contRead)) {
+        root = add_word(root, word);
+        free(word);
+        if (!contRead) {
+            break;
+        }
+    }
+    print_list(root);
+    delete_list(root);
     return 0;
 }
