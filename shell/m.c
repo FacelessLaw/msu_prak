@@ -95,7 +95,9 @@ main(int argc, char *argv[]) {
     /*
     TEST_LIST();
     */
-    printf("Djarvis ~> ");
+    
+    
+    /*printf("Djarvis ~> ");
     plist root = NULL;
     char * word = NULL;
     int contRead = 1;
@@ -108,5 +110,7 @@ main(int argc, char *argv[]) {
     }
     print_list(root);
     delete_list(root);
+    */
+    parse_cmd();
     return 0;
 }
