@@ -79,8 +79,11 @@ mode_logic(
 {
     *pBreakFlag = 0;
     if (ch == '\n') {
-        *pmode = FREE;
+        *presult = add_word(*presult, *ps);
+        *plen = 0;
+        *ps[*plen] = 0;
         *pBreakFlag = 1;
+        *pmode = FREE;
         return;
     }
     if (ch == endCh) {
@@ -125,6 +128,85 @@ mode_logic(
     }
 }
 
+void 
+mode_free(
+        int ch, 
+        int * plastWasSpace, 
+        char ** ps, 
+        int * plen, 
+        int *psz, 
+        int *pmode, 
+        int *pBreakFlag,
+        int *pwasReading,
+        plist *presult)
+{
+    if (isspace(ch)) {
+        if (!*plastWasSpace) {
+            *presult = add_word(*presult, *ps);
+            *plen = 0;
+            *ps[*plen] = 0;
+            *plastWasSpace = 1;
+        }
+        if (ch == '\n') {
+            *pBreakFlag = 1;
+            return ;
+        }
+        return;
+    }
+    *pwasReading = 1;
+    if (ch == '\'') {                
+        *pmode = WAIT_ONES;
+        *plastWasSpace = 0;
+    } else if (ch == '\"') {
+        *pmode = WAIT_PAIR;
+        *plastWasSpace = 0;
+    } else if (ch == '\\') {
+        *pmode = WAIT_ANY;
+        *plastWasSpace = 0;
+    } else if (ch == '&') {
+        *pmode = AMPER;
+        if (!*plastWasSpace) {
+            *presult = add_word(*presult, *ps);
+            *plen = 0;
+            *ps[*plen] = 0;
+        }
+        *ps = add_ch(*ps, '&', plen, psz);
+        *plastWasSpace = 0;
+    } else if (ch == '|') {
+        *pmode = PIPE;
+        if (!*plastWasSpace) {
+            *presult = add_word(*presult, *ps);
+            *plen = 0;
+            *ps[*plen] = 0;
+        }
+        *ps = add_ch(*ps, '|', plen, psz);
+        *plastWasSpace = 0;
+    } else {
+        *ps = add_ch(*ps, ch, plen, psz);
+        *plastWasSpace = 0;
+    }
+}
+
+void 
+mode_any(
+        int ch, 
+        int * plastWasSpace, 
+        char ** ps, 
+        int * plen, 
+        int *psz, 
+        int *pmode)
+{
+    if (ch != '\n') {
+        *ps = add_ch(*ps, ch, plen, psz);
+    } else {
+        printf("%s", CONT_LINE);
+    }
+    if (ch != '\\') {
+        *plastWasSpace = 0;
+        *pmode = FREE;
+    }
+}
+
 plist 
 parse_cmd() 
 {
@@ -142,81 +224,78 @@ parse_cmd()
     int lastWasSpace = 1; 
     while ((ch = getchar()) != EOF) {
         if (mode == FREE) {
-            if (isspace(ch)) {
-                if (!lastWasSpace) {
-                    result = add_word(result, s);
-                    len = 0;
-                    s[len] = 0;
-                    lastWasSpace = 1;
-                }
-                if (ch == '\n') {
-                    break;
-                }    
-                continue;
-            }
-            wasReading = 1;
-            if (ch == '\'') {                
-                mode = WAIT_ONES;
-                lastWasSpace = 0;
-            } else if (ch == '\"') {
-                mode = WAIT_PAIR;
-                lastWasSpace = 0;
-            } else if (ch == '\\') {
-                mode = WAIT_ANY;
-                lastWasSpace = 0;
-            } else if (ch == '&') {
-                mode = AMPER;
-                if (!lastWasSpace) {
-                    result = add_word(result, s);
-                    len = 0;
-                    s[len] = 0;
-                }
-                s = add_ch(s, '&', &len, &sz);
-                lastWasSpace = 0;
-            } else if (ch == '|') {
-                mode = PIPE;
-                if (!lastWasSpace) {
-                    result = add_word(result, s);
-                    len = 0;
-                    s[len] = 0;
-                }
-                s = add_ch(s, '|', &len, &sz);
-                lastWasSpace = 0;
-            } else {
-                s = add_ch(s, ch, &len, &sz);
-                lastWasSpace = 0;
+            int breakFlag = 0;
+            mode_free(
+                ch, 
+                &lastWasSpace, 
+                &s, &len, 
+                &sz, 
+                &mode,
+                &breakFlag, 
+                &wasReading, 
+                &result
+            );
+            if (breakFlag) {
+                break;
             }
         } else if (mode == WAIT_ONES) {
-            mode_quotes(ch, &lastWasSpace, &s, &len, &sz, &mode, '\'');
+            mode_quotes(
+                ch, 
+                &lastWasSpace, 
+                &s, 
+                &len, 
+                &sz, 
+                &mode, 
+                '\''
+            );
         } else if (mode == WAIT_PAIR) {
-            mode_quotes(ch, &lastWasSpace, &s, &len, &sz, &mode, '\"');
+            mode_quotes(
+                ch, 
+                &lastWasSpace, 
+                &s, 
+                &len, 
+                &sz, 
+                &mode, 
+                '\"'
+            );
         } else if (mode == WAIT_ANY) {
-            if (ch != '\n') {
-                s = add_ch(s, ch, &len, &sz);
-            } else {
-                printf("%s", CONT_LINE);
-            }
-            if (ch != '\\') {
-                lastWasSpace = 0;
-                mode = FREE;
-            }
+            mode_any(ch, &lastWasSpace, &s, &len, &sz, &mode);
         } else if (mode == AMPER || mode == PIPE) {
             int endCh = (mode == AMPER ? '&' : '|'); 
             int breakFlag = 0;
-            mode_logic(ch, &lastWasSpace, &s, &len, &sz, &mode, endCh, &breakFlag, &result);
+            mode_logic(
+                ch, 
+                &lastWasSpace, 
+                &s, 
+                &len, 
+                &sz, 
+                &mode, 
+                endCh, 
+                &breakFlag, 
+                &result
+            );
             if (breakFlag) {
                 break;
             }
         }
     }
-    if (mode != FREE) {
-        fprintf(stderr, "Djarvis: Unexpected EOF during the search %s\n", ERROR_LINE[mode]);
+    if (mode == WAIT_ONES) {
+        fprintf(stderr, "Djarvis: Unexpected EOF during the search <\'>\n");
         fprintf(stderr, "Djarvis: Syntax error \n");
         free(s);
+        delete_list(result);
+        return NULL;
+    }
+    if (mode == WAIT_PAIR) {
+        fprintf(stderr, "Djarvis: Unexpected EOF during the search <\">\n");
+        fprintf(stderr, "Djarvis: Syntax error \n");
+        free(s);
+        delete_list(result);
         return NULL;
     }
     if (wasReading) {
-        if (ch == EOF) { //for files.
+        if (ch == EOF) { //for files. ...
+            printf("im here");
             result = add_word(result, s);
         }
         free(s);
