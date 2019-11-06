@@ -3,7 +3,9 @@
 #include <stdlib.h>
 #include "../list/list.h"
 
-char * add_ch(char *s, int ch, int *len, int *sz) {
+char * 
+add_ch(char *s, int ch, int *len, int *sz) 
+{
     s[(*len)++] = ch;
     s[*len] = 0;
     if (*len + 1 == *sz) {
@@ -31,7 +33,101 @@ const char * ERROR_LINE[4] = {
     "\"`\"",
 };
 
-plist parse_cmd() {
+char * 
+change_vals(char *s) 
+{
+    /* &PATH */
+    /* TODO */
+    return s;
+}
+
+void 
+mode_quotes(
+        int ch, 
+        int * plastWasSpace, 
+        char ** ps, 
+        int * plen, 
+        int *psz, 
+        int *pmode, 
+        int endCh) 
+{
+    if (ch == endCh) {
+        /*if (*pmode == WAIT_PAIR) {
+            *ps = to_norm(*ps);
+        }*/
+        *plastWasSpace = 0;
+        *pmode = FREE;
+    } else {
+        if (ch == '\n') {
+            printf("%s", CONT_LINE);
+        }
+        *ps = add_ch(*ps, ch, plen, psz);
+    }
+}
+
+void 
+mode_logic(
+        int ch, 
+        int * plastWasSpace, 
+        char ** ps, 
+        int * plen, 
+        int *psz, 
+        int *pmode, 
+        int endCh,
+        int *pBreakFlag,
+        plist *presult) 
+{
+    *pBreakFlag = 0;
+    if (ch == '\n') {
+        *pmode = FREE;
+        *pBreakFlag = 1;
+        return;
+    }
+    if (ch == endCh) {
+        *ps = add_ch(*ps, endCh, plen, psz);
+        *presult = add_word(*presult, *ps);
+        *plen = 0;
+        *ps[*plen] = 0;
+        *plastWasSpace = 1;
+        *pmode = FREE;
+    } else if (ch == '\'') {
+        *presult = add_word(*presult, *ps);
+        *plen = 0;
+        *ps[*plen] = 0;
+        *plastWasSpace = 1;
+        *pmode = WAIT_ONES;
+    } else if (ch == '\"') {
+        *presult = add_word(*presult, *ps);
+        *plen = 0;
+        *ps[*plen] = 0;
+        *plastWasSpace = 1;
+        *pmode = WAIT_PAIR;
+    } else if (ch == '\\') {
+        *pmode = WAIT_ANY;
+        *presult = add_word(*presult, *ps);
+        *plen = 0;
+        *ps[*plen] = 0;
+        *plastWasSpace = 1;
+        *pmode = FREE;
+    } else if (isspace(ch)) {
+        *presult = add_word(*presult, *ps);
+        *plen = 0;
+        *ps[*plen] = 0;
+        *plastWasSpace = 1;
+        *pmode = FREE;
+    } else {
+        *presult = add_word(*presult, *ps);
+        *plen = 0;
+        *ps[*plen] = 0;
+        *ps = add_ch(*ps, ch, plen, psz);
+        *plastWasSpace = 0;
+        *pmode = FREE;
+    }
+}
+
+plist 
+parse_cmd() 
+{
     printf("Djarvis ~> ");
     
     plist result = NULL;
@@ -48,7 +144,6 @@ plist parse_cmd() {
         if (mode == FREE) {
             if (isspace(ch)) {
                 if (!lastWasSpace) {
-                    //s = add_ch(s, ' ', &len, &sz);
                     result = add_word(result, s);
                     len = 0;
                     s[len] = 0;
@@ -56,8 +151,7 @@ plist parse_cmd() {
                 }
                 if (ch == '\n') {
                     break;
-                }
-                
+                }    
                 continue;
             }
             wasReading = 1;
@@ -67,47 +161,35 @@ plist parse_cmd() {
             } else if (ch == '\"') {
                 mode = WAIT_PAIR;
                 lastWasSpace = 0;
-            }else if (ch == '\\') {
+            } else if (ch == '\\') {
                 mode = WAIT_ANY;
                 lastWasSpace = 0;
             } else if (ch == '&') {
                 mode = AMPER;
                 if (!lastWasSpace) {
-                    //s = add_ch(s, ' ', &len, &sz);
                     result = add_word(result, s);
                     len = 0;
                     s[len] = 0;
                 }
                 s = add_ch(s, '&', &len, &sz);
                 lastWasSpace = 0;
+            } else if (ch == '|') {
+                mode = PIPE;
+                if (!lastWasSpace) {
+                    result = add_word(result, s);
+                    len = 0;
+                    s[len] = 0;
+                }
+                s = add_ch(s, '|', &len, &sz);
+                lastWasSpace = 0;
             } else {
                 s = add_ch(s, ch, &len, &sz);
                 lastWasSpace = 0;
             }
         } else if (mode == WAIT_ONES) {
-            if (ch == '\'') {
-                lastWasSpace = 0;
-                mode = FREE;
-            } else {
-                if (ch == '\n') {
-                    printf("%s", CONT_LINE);
-                }
-                s = add_ch(s, ch, &len, &sz);
-            }
+            mode_quotes(ch, &lastWasSpace, &s, &len, &sz, &mode, '\'');
         } else if (mode == WAIT_PAIR) {
-            /* 
-                тут на самом деле работает еще вставка переменных
-                например $PATH заменяется на значение переменной.
-            */
-            if (ch == '\"') {
-                lastWasSpace = 0;
-                mode = FREE;
-            } else {
-                if (ch == '\n') {
-                    printf("%s", CONT_LINE);
-                }
-                s = add_ch(s, ch, &len, &sz);
-            }
+            mode_quotes(ch, &lastWasSpace, &s, &len, &sz, &mode, '\"');
         } else if (mode == WAIT_ANY) {
             if (ch != '\n') {
                 s = add_ch(s, ch, &len, &sz);
@@ -118,62 +200,12 @@ plist parse_cmd() {
                 lastWasSpace = 0;
                 mode = FREE;
             }
-        } else if (mode == AMPER) {
-            if (ch == '\n') {
-                mode = FREE;
+        } else if (mode == AMPER || mode == PIPE) {
+            int endCh = (mode == AMPER ? '&' : '|'); 
+            int breakFlag = 0;
+            mode_logic(ch, &lastWasSpace, &s, &len, &sz, &mode, endCh, &breakFlag, &result);
+            if (breakFlag) {
                 break;
-            }
-            if (ch == '&') {
-                s = add_ch(s, '&', &len, &sz);
-                result = add_word(result, s);
-                len = 0;
-                s[len] = 0;
-                //s = add_ch(s, ' ', &len, &sz);
-                lastWasSpace = 1;
-                mode = FREE;
-            } else if (ch == '\'') {
-                result = add_word(result, s);
-                len = 0;
-                s[len] = 0;
-                
-                //s = add_ch(s, ' ', &len, &sz);
-                lastWasSpace = 1;
-                mode = WAIT_ONES;
-            } else if (ch == '\"') {
-                result = add_word(result, s);
-                len = 0;
-                s[len] = 0;
-                
-                //s = add_ch(s, ' ', &len, &sz);
-                lastWasSpace = 1;
-                mode = WAIT_PAIR;
-            } else if (ch == '\\') {
-                mode = WAIT_ANY;
-                
-                result = add_word(result, s);
-                len = 0;
-                s[len] = 0;
-                
-                //s = add_ch(s, ' ', &len, &sz);
-                lastWasSpace = 1;
-                mode = FREE;
-            } else if (isspace(ch)) {
-                result = add_word(result, s);
-                len = 0;
-                s[len] = 0;
-                
-                //s = add_ch(s, ' ', &len, &sz);
-                lastWasSpace = 1;
-                mode = FREE;
-            } else {
-                result = add_word(result, s);
-                len = 0;
-                s[len] = 0;
-                
-                //s = add_ch(s, ' ', &len, &sz);
-                s = add_ch(s, ch, &len, &sz);
-                lastWasSpace = 0;
-                mode = FREE;
             }
         }
     }

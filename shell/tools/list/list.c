@@ -41,7 +41,7 @@ void delete_list(plist root) {
 
 void print_list(plist root) {
     while (root) {
-        printf("\n ---> %s <--- \n", root->key);
+        printf(" ---> %s <--- \n", root->key);
         root = root->next;
     }
 }
