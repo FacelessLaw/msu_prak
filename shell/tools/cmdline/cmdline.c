@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../list/list.h"
 
 char * 
@@ -20,9 +21,8 @@ enum {
     WAIT_PAIR = 1, /// ""
     WAIT_ANY = 2, /// \;
     WAIT_GRAVIS = 3, /// `;
-    AMPER = 4, /// `;
-    PIPE = 5, 
-    FREE = 6, /// ...
+    PAIR_CH = 4, // (&, |, <, >);  
+    FREE = 5, /// ...
 };
 
 const char * CONT_LINE = "~> ";
@@ -32,6 +32,7 @@ const char * ERROR_LINE[4] = {
     "ANY ch. Last ch was \"\\\"",
     "\"`\"",
 };
+const char PAIR_CHARS[5] = "|&<>"; 
 
 char * 
 change_vals(char *s) 
@@ -66,7 +67,7 @@ mode_quotes(
 }
 
 void 
-mode_logic(
+mode_pair(
         int ch, 
         int * plastWasSpace, 
         char ** ps, 
@@ -77,54 +78,43 @@ mode_logic(
         int *pBreakFlag,
         plist *presult) 
 {
-    *pBreakFlag = 0;
+    if (ch == endCh) {
+        *ps = add_ch(*ps, endCh, plen, psz);
+    }
+    *presult = add_word(*presult, *ps);
+    *plen = 0;
+    *ps[*plen] = 0;
+    
     if (ch == '\n') {
-        *presult = add_word(*presult, *ps);
-        *plen = 0;
-        *ps[*plen] = 0;
         *pBreakFlag = 1;
         *pmode = FREE;
         return;
     }
     if (ch == endCh) {
-        *ps = add_ch(*ps, endCh, plen, psz);
-        *presult = add_word(*presult, *ps);
-        *plen = 0;
-        *ps[*plen] = 0;
-        *plastWasSpace = 1;
         *pmode = FREE;
+        *pBreakFlag = 0;
+        *plastWasSpace = 1;
     } else if (ch == '\'') {
-        *presult = add_word(*presult, *ps);
-        *plen = 0;
-        *ps[*plen] = 0;
-        *plastWasSpace = 1;
         *pmode = WAIT_ONES;
+        *pBreakFlag = 0;
+        *plastWasSpace = 1;
     } else if (ch == '\"') {
-        *presult = add_word(*presult, *ps);
-        *plen = 0;
-        *ps[*plen] = 0;
-        *plastWasSpace = 1;
         *pmode = WAIT_PAIR;
+        *pBreakFlag = 0;
+        *plastWasSpace = 1;
     } else if (ch == '\\') {
-        *pmode = WAIT_ANY;
-        *presult = add_word(*presult, *ps);
-        *plen = 0;
-        *ps[*plen] = 0;
-        *plastWasSpace = 1;
         *pmode = FREE;
+        *pBreakFlag = 0;
+        *plastWasSpace = 1;
     } else if (isspace(ch)) {
-        *presult = add_word(*presult, *ps);
-        *plen = 0;
-        *ps[*plen] = 0;
+        *pmode = FREE;
+        *pBreakFlag = 0;
         *plastWasSpace = 1;
-        *pmode = FREE;
     } else {
-        *presult = add_word(*presult, *ps);
-        *plen = 0;
-        *ps[*plen] = 0;
         *ps = add_ch(*ps, ch, plen, psz);
-        *plastWasSpace = 0;
         *pmode = FREE;
+        *pBreakFlag = 0;
+        *plastWasSpace = 0;
     }
 }
 
@@ -163,23 +153,14 @@ mode_free(
     } else if (ch == '\\') {
         *pmode = WAIT_ANY;
         *plastWasSpace = 0;
-    } else if (ch == '&') {
-        *pmode = AMPER;
+    } else if (strchr(PAIR_CHARS, ch)) {
+        *pmode = PAIR_CH;
         if (!*plastWasSpace) {
             *presult = add_word(*presult, *ps);
             *plen = 0;
             *ps[*plen] = 0;
         }
-        *ps = add_ch(*ps, '&', plen, psz);
-        *plastWasSpace = 0;
-    } else if (ch == '|') {
-        *pmode = PIPE;
-        if (!*plastWasSpace) {
-            *presult = add_word(*presult, *ps);
-            *plen = 0;
-            *ps[*plen] = 0;
-        }
-        *ps = add_ch(*ps, '|', plen, psz);
+        *ps = add_ch(*ps, ch, plen, psz);
         *plastWasSpace = 0;
     } else {
         *ps = add_ch(*ps, ch, plen, psz);
@@ -260,10 +241,10 @@ parse_cmd()
             );
         } else if (mode == WAIT_ANY) {
             mode_any(ch, &lastWasSpace, &s, &len, &sz, &mode);
-        } else if (mode == AMPER || mode == PIPE) {
-            int endCh = (mode == AMPER ? '&' : '|'); 
+        } else if (mode == PAIR_CH) {
+            int endCh = s[len - 1]; 
             int breakFlag = 0;
-            mode_logic(
+            mode_pair(
                 ch, 
                 &lastWasSpace, 
                 &s, 
