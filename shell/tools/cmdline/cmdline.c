@@ -22,8 +22,8 @@ enum {
     WAIT_ANY = 2, /// \;
     WAIT_GRAVIS = 3, /// `;
     PAIR_CH = 4, // (&, |, <, >);
-    BRACKET = 5, // (&, |, <, >);
-    FREE = 6, /// ...
+    //BRACKET = 5, // (&, |, <, >);
+    FREE = 5, /// ...
 };
 
 const char * CONT_LINE = "~> ";
@@ -34,6 +34,7 @@ const char * ERROR_LINE[4] = {
     "\"`\"",
 };
 const char PAIR_CHARS[5] = "|&<>"; 
+const char ONES_CHARS[5] = ";,()"; 
 
 char * 
 change_vals(char *s) 
@@ -135,7 +136,7 @@ mode_pair(
         *pmode = FREE;
         *pBreakFlag = 0;
         *plastWasSpace = 1;
-    } else if (ch == '(' || ch == ')') {
+    } else if (strchr(ONES_CHARS, ch)) {
         *ps = add_ch(*ps, ch, plen, psz);
         add_word_to_res(presult, ps, plen);
         
@@ -191,7 +192,8 @@ mode_free(
         }
         *ps = add_ch(*ps, ch, plen, psz);
         *plastWasSpace = 0;
-    } else if (ch == '(' || ch == ')') {
+    } else if (strchr(ONES_CHARS, ch)) {
+        *pmode = FREE;
         if (!*plastWasSpace) {
             add_word_to_res(presult, ps, plen);
         }
