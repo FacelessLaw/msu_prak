@@ -21,8 +21,9 @@ enum {
     WAIT_PAIR = 1, /// ""
     WAIT_ANY = 2, /// \;
     WAIT_GRAVIS = 3, /// `;
-    PAIR_CH = 4, // (&, |, <, >);  
-    FREE = 5, /// ...
+    PAIR_CH = 4, // (&, |, <, >);
+    BRACKET = 5, // (&, |, <, >);
+    FREE = 6, /// ...
 };
 
 const char * CONT_LINE = "~> ";
@@ -41,6 +42,27 @@ change_vals(char *s)
     /* TODO */
     return s;
 }
+
+void 
+mode_any(
+        int ch, 
+        int * plastWasSpace, 
+        char ** ps, 
+        int * plen, 
+        int *psz, 
+        int *pmode)
+{
+    if (ch != '\n') {
+        *ps = add_ch(*ps, ch, plen, psz);
+    } else {
+        printf("%s", CONT_LINE);
+    }
+    if (ch != '\\') {
+        *plastWasSpace = 0;
+        *pmode = FREE;
+    }
+}
+
 
 void 
 mode_quotes(
@@ -66,6 +88,12 @@ mode_quotes(
     }
 }
 
+void add_word_to_res(plist *presult, char **ps, int *plen) {
+    *presult = add_word(*presult, *ps);
+    *plen = 0;
+    *ps[*plen] = 0;
+}
+
 void 
 mode_pair(
         int ch, 
@@ -81,10 +109,7 @@ mode_pair(
     if (ch == endCh) {
         *ps = add_ch(*ps, endCh, plen, psz);
     }
-    *presult = add_word(*presult, *ps);
-    *plen = 0;
-    *ps[*plen] = 0;
-    
+    add_word_to_res(presult, ps, plen);
     if (ch == '\n') {
         *pBreakFlag = 1;
         *pmode = FREE;
@@ -110,8 +135,16 @@ mode_pair(
         *pmode = FREE;
         *pBreakFlag = 0;
         *plastWasSpace = 1;
+    } else if (ch == '(' || ch == ')') {
+        *ps = add_ch(*ps, ch, plen, psz);
+        add_word_to_res(presult, ps, plen);
+        
+        *pmode = FREE;
+        *pBreakFlag = 0;
+        *plastWasSpace = 0;
     } else {
         *ps = add_ch(*ps, ch, plen, psz);
+        
         *pmode = FREE;
         *pBreakFlag = 0;
         *plastWasSpace = 0;
@@ -132,9 +165,7 @@ mode_free(
 {
     if (isspace(ch)) {
         if (!*plastWasSpace) {
-            *presult = add_word(*presult, *ps);
-            *plen = 0;
-            *ps[*plen] = 0;
+            add_word_to_res(presult, ps, plen);
             *plastWasSpace = 1;
         }
         if (ch == '\n') {
@@ -156,37 +187,23 @@ mode_free(
     } else if (strchr(PAIR_CHARS, ch)) {
         *pmode = PAIR_CH;
         if (!*plastWasSpace) {
-            *presult = add_word(*presult, *ps);
-            *plen = 0;
-            *ps[*plen] = 0;
+            add_word_to_res(presult, ps, plen);
         }
         *ps = add_ch(*ps, ch, plen, psz);
         *plastWasSpace = 0;
+    } else if (ch == '(' || ch == ')') {
+        if (!*plastWasSpace) {
+            add_word_to_res(presult, ps, plen);
+        }
+        *ps = add_ch(*ps, ch, plen, psz);
+        add_word_to_res(presult, ps, plen);
+        *plastWasSpace = 1;
     } else {
         *ps = add_ch(*ps, ch, plen, psz);
         *plastWasSpace = 0;
     }
 }
 
-void 
-mode_any(
-        int ch, 
-        int * plastWasSpace, 
-        char ** ps, 
-        int * plen, 
-        int *psz, 
-        int *pmode)
-{
-    if (ch != '\n') {
-        *ps = add_ch(*ps, ch, plen, psz);
-    } else {
-        printf("%s", CONT_LINE);
-    }
-    if (ch != '\\') {
-        *plastWasSpace = 0;
-        *pmode = FREE;
-    }
-}
 
 plist 
 parse_cmd() 
@@ -275,8 +292,7 @@ parse_cmd()
         return NULL;
     }
     if (wasReading) {
-        if (ch == EOF) { //for files. ...
-            printf("im here");
+        if (ch == EOF && strlen(s)) { //for files. ...
             result = add_word(result, s);
         }
         free(s);
