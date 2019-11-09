@@ -17,3 +17,8 @@ void print_list(plist root);
 /*
     hello, cap.
 */
+
+char ** ltoa(plist root);
+/*
+    hello, cap.
+*/

@@ -8,7 +8,26 @@ typedef list * plist;
 struct list {
     char * key;
     plist next;
+    int type;
 };
+
+char ** ltoa(plist root) {
+    if (!root) {
+        return NULL;
+    }
+    int len = 0, sz = 2;
+    char ** res = (char **)realloc(NULL, sizeof(*res) * sz);
+    while (root) {
+        res[len++] = root->key;
+        if (len == sz - 1) {
+            sz *= 2;
+            res = (char **) realloc(res, sizeof(*res) * sz);
+        }
+        root = root->next;
+    }
+    res[len] = NULL;
+    return res;
+}
 
 plist create_node(char *key) {
     plist root = (plist) malloc(sizeof(*root));
