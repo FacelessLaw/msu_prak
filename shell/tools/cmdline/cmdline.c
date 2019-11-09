@@ -299,15 +299,23 @@ parse_cmd()
         delete_list(result);
         return NULL;
     }
-
-    if (wasReading) {
-        if (ch == EOF && strlen(s)) { //for files. ...
-            result = add_word(result, s, mode != FREE);
-        }
+    if (!wasReading) {
         free(s);
-        return result;
+        delete_list(result); // tut result na samom dele doljen byt ravnym NULL
+        return NULL;
+    }
+
+    if (ch == EOF && strlen(s)) { //for files. ...
+        result = add_word(result, s, mode != FREE);
     }
     free(s);
-    delete_list(result); // tut result na samom dele doljen byt ravnym NULL
-    return NULL;
+    if (!check_brackets(result)) {
+        fprintf(stderr, "Djarvis: Brackets, bro..\n");
+        fprintf(stderr, "Djarvis: Syntax error \n");
+        
+        delete_list(result);
+        return NULL;
+    }
+    return result;
+    
 }

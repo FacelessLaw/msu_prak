@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "list.h"
 
 typedef struct list list;
 typedef list * plist;
@@ -64,4 +65,22 @@ void print_list(plist root) {
         printf(" ---> %s <--- <%d> \n", root->key, root->type);
         root = root->next;
     }
+}
+
+int check_brackets(plist res) {
+    int sum = 0;
+    while (res) {
+        if (res->type == BASH_MODE) {
+            if (!strcmp(res->key, ")")) {
+                --sum;
+            } else if (!strcmp(res->key, "(")) {
+                ++sum;
+            }
+        }
+        if (sum < 0) {
+            return 0;
+        }
+        res = res->next;
+    }
+    return sum == 0;
 }

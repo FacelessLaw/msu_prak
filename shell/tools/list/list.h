@@ -27,3 +27,5 @@ char ** ltoa(plist root);
 /*
     hello, cap.
 */
+
+int check_brackets(plist res);
