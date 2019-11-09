@@ -33,8 +33,8 @@ const char * ERROR_LINE[4] = {
     "ANY ch. Last ch was \"\\\"",
     "\"`\"",
 };
-const char PAIR_CHARS[5] = "|&<>"; 
-const char ONES_CHARS[5] = ";,()"; 
+const char PAIR_CHARS[5] = "|&<>\0"; 
+const char ONES_CHARS[5] = ";,()\0"; 
 
 char * 
 change_vals(char *s) 
@@ -120,6 +120,12 @@ mode_pair(
         *pmode = FREE;
         *pBreakFlag = 0;
         *plastWasSpace = 1;
+    } else if (strchr(PAIR_CHARS, ch)) {
+        *ps = add_ch(*ps, ch, plen, psz);
+        
+        *pmode = PAIR_CH;
+        *pBreakFlag = 0;
+        *plastWasSpace = 0;
     } else if (ch == '\'') {
         *pmode = WAIT_ONES;
         *pBreakFlag = 0;
@@ -138,7 +144,6 @@ mode_pair(
         *plastWasSpace = 1;
     } else if (strchr(ONES_CHARS, ch)) {
         *ps = add_ch(*ps, ch, plen, psz);
-        add_word_to_res(presult, ps, plen);
         
         *pmode = FREE;
         *pBreakFlag = 0;
