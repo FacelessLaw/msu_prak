@@ -29,23 +29,24 @@ char ** ltoa(plist root) {
     return res;
 }
 
-plist create_node(char *key) {
+plist create_node(char *key, int type) {
     plist root = (plist) malloc(sizeof(*root));
     root->next = NULL;
+    root->type = type;
     root->key = (char *) malloc(sizeof(*key) * (strlen(key) + 1));
     strcpy(root->key, key);
     return root;
 }
 
-plist add_word(plist root, char *key) {
+plist add_word(plist root, char *key, int type) {
     if (!root) {
-        return create_node(key);
+        return create_node(key, type);
     }
     plist it = root;
     while (it->next) {
         it = it->next;
     }
-    it->next = create_node(key);
+    it->next = create_node(key, type);
     return root;
 }
 
@@ -60,7 +61,7 @@ void delete_list(plist root) {
 
 void print_list(plist root) {
     while (root) {
-        printf(" ---> %s <--- \n", root->key);
+        printf(" ---> %s <--- <%d> \n", root->key, root->type);
         root = root->next;
     }
 }

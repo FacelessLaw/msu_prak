@@ -89,8 +89,8 @@ mode_quotes(
     }
 }
 
-void add_word_to_res(plist *presult, char **ps, int *plen) {
-    *presult = add_word(*presult, *ps);
+void add_word_to_res(plist *presult, char **ps, int *plen, int type) {
+    *presult = add_word(*presult, *ps, type);
     *plen = 0;
     *ps[*plen] = 0;
 }
@@ -110,7 +110,7 @@ mode_pair(
     if (ch == endCh) {
         *ps = add_ch(*ps, endCh, plen, psz);
     }
-    add_word_to_res(presult, ps, plen);
+    add_word_to_res(presult, ps, plen, BASH_MODE);
     if (ch == '\n') {
         *pBreakFlag = 1;
         *pmode = FREE;
@@ -144,10 +144,11 @@ mode_pair(
         *plastWasSpace = 1;
     } else if (strchr(ONES_CHARS, ch)) {
         *ps = add_ch(*ps, ch, plen, psz);
-        
+        add_word_to_res(presult, ps, plen, BASH_MODE);
+
         *pmode = FREE;
         *pBreakFlag = 0;
-        *plastWasSpace = 0;
+        *plastWasSpace = 1;
     } else {
         *ps = add_ch(*ps, ch, plen, psz);
         
@@ -171,7 +172,7 @@ mode_free(
 {
     if (isspace(ch)) {
         if (!*plastWasSpace) {
-            add_word_to_res(presult, ps, plen);
+            add_word_to_res(presult, ps, plen, WORD_MODE);
             *plastWasSpace = 1;
         }
         if (ch == '\n') {
@@ -193,17 +194,17 @@ mode_free(
     } else if (strchr(PAIR_CHARS, ch)) {
         *pmode = PAIR_CH;
         if (!*plastWasSpace) {
-            add_word_to_res(presult, ps, plen);
+            add_word_to_res(presult, ps, plen, WORD_MODE);
         }
         *ps = add_ch(*ps, ch, plen, psz);
         *plastWasSpace = 0;
     } else if (strchr(ONES_CHARS, ch)) {
         *pmode = FREE;
         if (!*plastWasSpace) {
-            add_word_to_res(presult, ps, plen);
+            add_word_to_res(presult, ps, plen, WORD_MODE);
         }
         *ps = add_ch(*ps, ch, plen, psz);
-        add_word_to_res(presult, ps, plen);
+        add_word_to_res(presult, ps, plen, BASH_MODE);
         *plastWasSpace = 1;
     } else {
         *ps = add_ch(*ps, ch, plen, psz);
@@ -298,9 +299,10 @@ parse_cmd()
         delete_list(result);
         return NULL;
     }
+
     if (wasReading) {
         if (ch == EOF && strlen(s)) { //for files. ...
-            result = add_word(result, s);
+            result = add_word(result, s, mode != FREE);
         }
         free(s);
         return result;

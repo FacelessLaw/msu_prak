@@ -5,6 +5,7 @@
 #include "tools/runproc/runproc.h"
 
 const char * PARSE = "-p\0";
+const char * PARSE_INF = "-pi\0";
 const char * RUN = "-r\0";
 const char * HELP = "-h\0";
 
@@ -28,6 +29,15 @@ main(int argc, char *argv[]) {
             printf("\t -r \t run command\n\n");
             printf("\t -p \t print parse command\n\n");
             printf("\t -h \t print help\n\n");
+            return 0;
+        } else if (!strcmp(argv[1], PARSE_INF)) {
+            while (1) {
+                printf("\n");
+                plist cmd = parse_cmd();
+                printf("\n");
+                print_list(cmd);
+                delete_list(cmd);
+            }
             return 0;
         }
     }
