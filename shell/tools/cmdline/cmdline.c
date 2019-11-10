@@ -33,8 +33,8 @@ const char * ERROR_LINE[4] = {
     "ANY ch. Last ch was \"\\\"",
     "\"`\"",
 };
-const char PAIR_CHARS[5] = "|&<>\0"; 
-const char ONES_CHARS[5] = ";,()\0"; 
+const char PAIR_CHARS[5] = "|&>\0"; 
+const char ONES_CHARS[6] = "<;,()\0"; 
 
 char * 
 change_vals(char *s) 

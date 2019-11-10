@@ -3,15 +3,6 @@
 #include <string.h>
 #include "list.h"
 
-typedef struct list list;
-typedef list * plist;
-
-struct list {
-    char * key;
-    plist next;
-    int type;
-};
-
 char ** ltoa(plist root) {
     if (!root) {
         return NULL;

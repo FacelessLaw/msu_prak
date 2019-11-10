@@ -1,5 +1,10 @@
 typedef struct list list;
 typedef list * plist;
+struct list {
+    char * key;
+    plist next;
+    int type;
+};
 
 enum {
     WORD_MODE = 0,
@@ -29,3 +34,10 @@ char ** ltoa(plist root);
 */
 
 int check_brackets(plist res);
+/*
+())
+(()
+*/
+
+plist create_node(char *key, int type);
+/* create node with key=key, type=type, next=null */
