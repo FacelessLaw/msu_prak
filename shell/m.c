@@ -104,6 +104,7 @@ main(int argc, char *argv[]) {
             closeProc = NULL;
         }
     }
+    printf("\n");
     delete_all();
     print_loop(closeProc);
     delete_list(closeProc);        
