@@ -214,7 +214,7 @@ mode_free(
 
 
 plist 
-parse_cmd() 
+parse_cmd(int * wasEOF) 
 {
     printf("Djarvis ~> ");
     
@@ -285,6 +285,9 @@ parse_cmd()
             }
         }
     }
+    if (ch == EOF) {
+        *wasEOF = 1;
+    }
     if (mode == WAIT_ONES) {
         fprintf(stderr, "Djarvis: Unexpected EOF during the search <\'>\n");
         fprintf(stderr, "Djarvis: Syntax error \n");
@@ -304,7 +307,6 @@ parse_cmd()
         delete_list(result); // tut result na samom dele doljen byt ravnym NULL
         return NULL;
     }
-
     if (ch == EOF && strlen(s)) { //for files. ...
         result = add_word(result, s, mode != FREE);
     }

@@ -50,6 +50,9 @@ plist parse_list(plist p, int * fr, int * fw, int * bmode) {
 }
 
 void runproc(plist p) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
+    if (!p) {
+        return ;
+    }
     int fr, fw, bm;
     
     plist res = parse_list(p, &fr, &fw, &bm);
@@ -76,7 +79,8 @@ void runproc(plist p) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
             close(fw);
         }
         execvp(argv[0], argv);
-        printf("%s:: Error\n", argv[0]);
+        fprintf(stderr, "%s:: Error\n", argv[0]);
+        exit(1);
     } else {
         wait(NULL);
         if (fr != -1) {

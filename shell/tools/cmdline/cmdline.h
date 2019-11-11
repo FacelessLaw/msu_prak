@@ -9,4 +9,4 @@ char * read_word();
     Возвращает очередной аргумент argv[..] при запуске программы.
 */
 
-plist parse_cmd();
+plist parse_cmd(int * wasEOF);
