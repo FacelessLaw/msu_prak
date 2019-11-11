@@ -11,6 +11,10 @@ enum {
     BASH_MODE = 1,    
 };
 
+void print_loop(plist root);
+
+plist del_pid(plist root, int pid, plist * node);
+
 plist add_word(plist root, char *key, int type);
 /*
     if root is NULL create new plist el and return pointer

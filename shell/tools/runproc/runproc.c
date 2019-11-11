@@ -1,4 +1,3 @@
-#include "../list/list.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,6 +7,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <signal.h>
+#include "../list/list.h"
 
 /*void parse_list(char *** argv, plist p, int * fread, int * fwrite, int * bmode) {
     while (p) {
@@ -16,6 +16,8 @@
         }
     }
 }*/
+
+extern plist openProc; 
 
 plist parse_list(plist p, int * fr, int * fw, int * bmode) {
     *fr = *fw = -1;
@@ -113,6 +115,8 @@ void runproc(plist p) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
     } else {
         if (!bm) {
             wait(NULL);
+        } else {
+            openProc = add_word(openProc, argv[0], pid);
         }
         if (fr != -1) {
             close(fr);

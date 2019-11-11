@@ -42,12 +42,42 @@ plist add_word(plist root, char *key, int type) {
     return root;
 }
 
+plist del_pid(plist root, int pid, plist * node) {
+    *node = NULL;
+    if (!root) {
+        return NULL;
+    }
+    plist fs = root;
+    plist sc = root->next;
+    if (fs->type == pid) {
+        *node = fs;
+        return sc;
+    }
+    while (sc) {
+        if (sc->type == pid) {
+            *node = sc;
+            fs->next = sc->next;
+            return root;
+        }
+        fs = sc;
+        sc = sc->next;
+    }
+    return root;
+}
+
 void delete_list(plist root) {
     while (root) {
         plist tmp = root;
         root = root->next;
         free(tmp->key);
         free(tmp);
+    }
+}
+
+void print_loop(plist root) {
+    while (root) {
+        printf("proc: [%d] was killed \t %s \n", root->type, root->key);
+        root = root->next;
     }
 }
 
