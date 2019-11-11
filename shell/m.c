@@ -10,8 +10,11 @@ const char * PARSE_INF = "-pi\0";
 const char * RUN = "-r\0";
 const char * HELP = "-h\0";
 
+plist eventLoop = NULL;
+
 void listener(int sig) {
     printf("Child deads\n");
+    
     return ;
 }
 

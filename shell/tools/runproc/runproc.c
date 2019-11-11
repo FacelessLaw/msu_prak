@@ -67,6 +67,8 @@ void runproc(plist p) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
                 return ;
             }
             chdir(argv[1]);
+        } else {
+            chdir(getenv("HOME"));
         }
         delete_list(res);
         free(argv);
@@ -96,12 +98,10 @@ void runproc(plist p) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
         }
         if (bm) {
             signal(SIGINT,SIG_IGN);
-            if (fr != -1) {
-                fprintf(stderr, "WAAT\n");
-                exit(1);
+            if (fr == -1) {
+                fr = open("/dev/null", O_RDONLY);
+                dup2(fr, 0);
             }
-            fr = open("/dev/null", O_RDONLY);
-            dup2(fr, 0);
         }
         execvp(argv[0], argv);
         fprintf(stderr, "%s:: Error\n", argv[0]);
