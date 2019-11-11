@@ -41,7 +41,6 @@ void delete_all() {
     while (tmp) {
         int status;
         int pid = tmp->type;
-        printf("killing proc: [%d]\n", pid);
         kill(pid, 9);
         waitpid(pid, &status, 0);
         print_node(tmp);
