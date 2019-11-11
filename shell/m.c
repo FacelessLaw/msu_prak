@@ -90,7 +90,7 @@ main(int argc, char *argv[]) {
             return 0;
         }
     }
-    signal(SIGINT, sigint_listener);
+    signal(SIGINT, SIG_IGN);
     signal(SIGCHLD, sigchld_listener);
     wasEOF = 0;
     while (!wasEOF) {
