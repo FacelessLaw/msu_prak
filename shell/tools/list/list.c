@@ -74,9 +74,14 @@ void delete_list(plist root) {
     }
 }
 
+void print_node(plist root) {
+    printf("proc: [%d] was killed \t %s \n\n", root->type, root->key);
+}
+
 void print_loop(plist root) {
     while (root) {
-        printf("proc: [%d] was killed \t %s \n", root->type, root->key);
+        //printf("proc: [%d] was killed \t %s \n", root->type, root->key);
+        print_node(root);
         root = root->next;
     }
 }

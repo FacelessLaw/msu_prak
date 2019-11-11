@@ -3,6 +3,7 @@
 #include <string.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 #include "tools/list/list.h"
 #include "tools/cmdline/cmdline.h"
 #include "tools/runproc/runproc.h"
@@ -15,17 +16,44 @@ const char * HELP = "-h\0";
 plist openProc = NULL;
 plist closeProc = NULL;
 
-void listener(int sig) {
-    int status;
-    int pid = wait(&status);
+void mv_proc(int pid) {
     plist node = NULL;
     openProc = del_pid(openProc, pid, &node);
     if (node) {
-        closeProc = add_word(closeProc, node->key, node->type);
-        free(node->key);
-        free(node);
+        node->next = closeProc;
+        closeProc = node;
     }
+}
+
+void 
+sigchld_listener(int sig) {
+    int status;
+    int pid = waitpid(-1, NULL, WNOHANG);
+    if (!pid) {
+        return ;
+    }
+    mv_proc(pid);
     return ;
+}
+
+void delete_all() {
+    plist tmp = openProc;
+    while (tmp) {
+        int status;
+        int pid = openProc->type;
+        printf("killing proc: [%d]\n", pid);
+        kill(pid, 9);
+        //waitpid(pid, &status, 0);
+        print_node(tmp);
+        tmp = tmp->next;
+    }
+    delete_list(openProc);
+    openProc = NULL;
+}
+
+void sigint_listener(int sig) {
+    printf("\nDelete procceses...\n");
+    delete_all();
 }
 
 int 
@@ -63,17 +91,25 @@ main(int argc, char *argv[]) {
             return 0;
         }
     }
-    //signal(SIGINT, listener);
-    signal(SIGCHLD, listener);
+    signal(SIGINT, sigint_listener);
+    signal(SIGCHLD, sigchld_listener);
     wasEOF = 0;
     while (!wasEOF) {
         plist cmd = parse_cmd(&wasEOF);
         runproc(cmd);
         delete_list(cmd);
+        
+        printf("\n");
+        printf("Open process:\n");
+        print_list(openProc);
+        printf("\n");
+        
+        printf("Delete process:\n");
         print_loop(closeProc);
+        printf("\n");
+        
         delete_list(closeProc);
         closeProc = NULL;
     }
-    printf("\n");
     return 0;
 }

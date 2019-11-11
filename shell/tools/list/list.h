@@ -11,6 +11,8 @@ enum {
     BASH_MODE = 1,    
 };
 
+void print_node(plist root);
+
 void print_loop(plist root);
 
 plist del_pid(plist root, int pid, plist * node);
