@@ -40,10 +40,10 @@ void delete_all() {
     plist tmp = openProc;
     while (tmp) {
         int status;
-        int pid = openProc->type;
+        int pid = tmp->type;
         printf("killing proc: [%d]\n", pid);
         kill(pid, 9);
-        //waitpid(pid, &status, 0);
+        waitpid(pid, &status, 0);
         print_node(tmp);
         tmp = tmp->next;
     }
@@ -98,18 +98,14 @@ main(int argc, char *argv[]) {
         plist cmd = parse_cmd(&wasEOF);
         runproc(cmd);
         delete_list(cmd);
-        
-        printf("\n");
-        printf("Open process:\n");
-        print_list(openProc);
-        printf("\n");
-        
-        printf("Delete process:\n");
-        print_loop(closeProc);
-        printf("\n");
-        
-        delete_list(closeProc);
-        closeProc = NULL;
+        if (closeProc) {
+            print_loop(closeProc);
+            delete_list(closeProc);
+            closeProc = NULL;
+        }
     }
+    delete_all();
+    print_loop(closeProc);
+    delete_list(closeProc);        
     return 0;
 }
