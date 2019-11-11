@@ -58,13 +58,26 @@ void runproc(plist p) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
         return ;
     }
     int fr = -1, fw = -1, bm = 0;
-    
     plist res = parse_list(p, &fr, &fw, &bm);
-        
+    char ** argv = ltoa(res);
+    if (!strcmp(argv[0], "cd")) {
+        if (argv[1]) {
+            if (argv[2]) {
+                fprintf(stderr, "Djarvis Error:: Too many arguments for cd\n");
+                return ;
+            }
+            chdir(argv[1]);
+        }
+        delete_list(res);
+        free(argv);
+        return ;
+    }
+
     int pid = fork();
     if (pid < 0) {
         fprintf(stderr, "can't fork\n");
         delete_list(res);
+        free(argv);
         if (fr != -1) {
             close(fr);
         }
@@ -73,7 +86,6 @@ void runproc(plist p) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
         }
         return ;
     } else if (pid == 0) {
-        char ** argv = ltoa(res);
         if (fr != -1) {
             dup2(fr, 0);
             close(fr);
@@ -104,6 +116,7 @@ void runproc(plist p) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
         if (fw != -1) {
             close(fw);
         }
+        free(argv);
         delete_list(res);
     }
 }

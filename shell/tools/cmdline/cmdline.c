@@ -21,8 +21,7 @@ enum {
     WAIT_PAIR = 1, /// ""
     WAIT_ANY = 2, /// \;
     WAIT_GRAVIS = 3, /// `;
-    PAIR_CH = 4, // (&, |, <, >);
-    //BRACKET = 5, // (&, |, <, >);
+    PAIR_CH = 4, // (&, |, >);
     FREE = 5, /// ...
 };
 
