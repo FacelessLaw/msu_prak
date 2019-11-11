@@ -102,6 +102,10 @@ void runproc(plist p) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
                 fr = open("/dev/null", O_RDONLY);
                 dup2(fr, 0);
             }
+            if (fw == -1) {
+                fw = open("/dev/null", O_WRONLY);
+                dup2(fw, 1);
+            }
         }
         execvp(argv[0], argv);
         fprintf(stderr, "%s:: Error\n", argv[0]);
