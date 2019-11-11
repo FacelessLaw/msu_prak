@@ -11,7 +11,7 @@ const char * RUN = "-r\0";
 const char * HELP = "-h\0";
 
 void listener(int sig) {
-    printf("\n");
+    printf("Child deads\n");
     return ;
 }
 
@@ -50,7 +50,8 @@ main(int argc, char *argv[]) {
             return 0;
         }
     }
-    signal(SIGINT, listener);
+    //signal(SIGINT, listener);
+    signal(SIGCHLD, listener);
     wasEOF = 0;
     while (!wasEOF) {
         plist cmd = parse_cmd(&wasEOF);
