@@ -51,8 +51,7 @@ void delete_all() {
 }
 
 void sigint_listener(int sig) {
-    printf("\nDelete procceses...\n");
-    delete_all();
+    //delete_all();
 }
 
 int 
@@ -105,6 +104,7 @@ main(int argc, char *argv[]) {
     }
     printf("\n");
     delete_all();
+    print_loop(openProc);
     print_loop(closeProc);
     delete_list(closeProc);        
     return 0;
