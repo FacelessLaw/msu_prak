@@ -99,7 +99,6 @@ void runproc(plist p) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
             close(fw);
         }
         if (bm) {
-            signal(SIGINT,SIG_IGN);
             if (fr == -1) {
                 fr = open("/dev/null", O_RDONLY);
                 dup2(fr, 0);
