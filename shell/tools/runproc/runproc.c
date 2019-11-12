@@ -113,7 +113,7 @@ void runproc(plist p) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
         exit(1);
     } else {
         if (!bm) {
-            wait(NULL);
+            waitpid(pid, NULL, 0);
         } else {
             openProc = add_word(openProc, argv[0], pid);
         }
