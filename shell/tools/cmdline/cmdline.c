@@ -106,10 +106,16 @@ mode_pair(
         int *pBreakFlag,
         plist *presult) 
 {
+    int cmd_mode = STREAM; // & > < >>
     if (ch == endCh) {
         *ps = add_ch(*ps, endCh, plen, psz);
+        if (ch != '>') {
+            cmd_mode = BASH;
+        }
+    } else if (endCh == '|') {
+        cmd_mode = PIPE;
     }
-    add_word_to_res(presult, ps, plen, BASH_MODE);
+    add_word_to_res(presult, ps, plen, cmd_mode);
     if (ch == '\n') {
         *pBreakFlag = 1;
         *pmode = FREE;
@@ -143,7 +149,7 @@ mode_pair(
         *plastWasSpace = 1;
     } else if (strchr(ONES_CHARS, ch)) {
         *ps = add_ch(*ps, ch, plen, psz);
-        add_word_to_res(presult, ps, plen, BASH_MODE);
+        add_word_to_res(presult, ps, plen, BASH);
 
         *pmode = FREE;
         *pBreakFlag = 0;
@@ -171,7 +177,7 @@ mode_free(
 {
     if (isspace(ch)) {
         if (!*plastWasSpace) {
-            add_word_to_res(presult, ps, plen, WORD_MODE);
+            add_word_to_res(presult, ps, plen, WORD);
             *plastWasSpace = 1;
         }
         if (ch == '\n') {
@@ -193,17 +199,21 @@ mode_free(
     } else if (strchr(PAIR_CHARS, ch)) {
         *pmode = PAIR_CH;
         if (!*plastWasSpace) {
-            add_word_to_res(presult, ps, plen, WORD_MODE);
+            add_word_to_res(presult, ps, plen, WORD);
         }
         *ps = add_ch(*ps, ch, plen, psz);
         *plastWasSpace = 0;
     } else if (strchr(ONES_CHARS, ch)) {
         *pmode = FREE;
         if (!*plastWasSpace) {
-            add_word_to_res(presult, ps, plen, WORD_MODE);
+            add_word_to_res(presult, ps, plen, WORD);
         }
         *ps = add_ch(*ps, ch, plen, psz);
-        add_word_to_res(presult, ps, plen, BASH_MODE);
+        int cmd_mode = BASH;
+        if (ch == '<') {
+            cmd_mode = STREAM;
+        }
+        add_word_to_res(presult, ps, plen, cmd_mode);
         *plastWasSpace = 1;
     } else {
         *ps = add_ch(*ps, ch, plen, psz);

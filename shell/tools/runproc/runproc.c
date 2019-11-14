@@ -23,8 +23,8 @@ plist parse_list(plist p, int * fr, int * fw, int * bmode) {
     *fr = *fw = -1;
     *bmode = 0;
     plist res = NULL;
-    while (p) {
-        if (p->type == BASH_MODE) {
+    while (p && p->type != BASH) {
+        if (p->type == BASH) {
             if (!strcmp(p->key, "&")) {
                 *bmode = 1;
             } else if (!strcmp(p->key, ">>")) {
@@ -102,10 +102,12 @@ void runproc(plist p) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
             if (fr == -1) {
                 fr = open("/dev/null", O_RDONLY);
                 dup2(fr, 0);
+                close(fr);
             }
             if (fw == -1) {
                 fw = open("/dev/null", O_WRONLY);
                 dup2(fw, 1);
+                close(fw);
             }
         }
         execvp(argv[0], argv);
@@ -127,3 +129,11 @@ void runproc(plist p) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
         delete_list(res);
     }
 }
+
+/*void run_cmd(plist cmd) { // A | B | C &
+    plist tmp = cmd;
+    while (tmp) {
+        plist end = tmp;
+        while ()
+    }
+}*/

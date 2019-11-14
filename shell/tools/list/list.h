@@ -7,8 +7,10 @@ struct list {
 };
 
 enum {
-    WORD_MODE = 0,
-    BASH_MODE = 1,    
+    WORD = 0, //./p arg1 arg2 ...
+    STREAM = 1, // >> < > &
+    PIPE = 1, // >> < > &
+    BASH = 2, // && ( ) || , ; 
 };
 
 void print_node(plist root);
@@ -22,6 +24,16 @@ plist add_word(plist root, char *key, int type);
     if root is NULL create new plist el and return pointer
     else return root
     add key to end of list
+*/
+
+plist next_cmd(plist root); 
+/*
+A | B | C && D
+
+return A
+return B
+return C
+
 */
 
 void delete_list(plist root);

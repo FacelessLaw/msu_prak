@@ -96,7 +96,7 @@ void print_list(plist root) {
 int check_brackets(plist res) {
     int sum = 0;
     while (res) {
-        if (res->type == BASH_MODE) {
+        if (res->type == BASH) {
             if (!strcmp(res->key, ")")) {
                 --sum;
             } else if (!strcmp(res->key, "(")) {
@@ -110,3 +110,10 @@ int check_brackets(plist res) {
     }
     return sum == 0;
 }
+
+/*
+plist next_cmd(plist root) {
+    while (root && root->) {
+        
+    }
+} */
