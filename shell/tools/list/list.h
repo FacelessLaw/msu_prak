@@ -9,8 +9,9 @@ struct list {
 enum {
     WORD = 0, //./p arg1 arg2 ...
     STREAM = 1, // >> < > &
-    PIPE = 1, // >> < > &
-    BASH = 2, // && ( ) || , ; 
+    PIPE = 2, // >> < > &
+    AMP = 3, // >> < > &
+    BASH = 4, // && ( ) || , ; 
 };
 
 void print_node(plist root);

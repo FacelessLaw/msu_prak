@@ -94,7 +94,8 @@ main(int argc, char *argv[]) {
     wasEOF = 0;
     while (!wasEOF) {
         plist cmd = parse_cmd(&wasEOF);
-        runproc(cmd);
+        //runproc(cmd);
+        runpipe(cmd);
         delete_list(cmd);
         if (closeProc) {
             print_loop(closeProc);

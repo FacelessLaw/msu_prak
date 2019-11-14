@@ -114,6 +114,8 @@ mode_pair(
         }
     } else if (endCh == '|') {
         cmd_mode = PIPE;
+    } else if (endCh == '&') {
+        cmd_mode = AMP;
     }
     add_word_to_res(presult, ps, plen, cmd_mode);
     if (ch == '\n') {

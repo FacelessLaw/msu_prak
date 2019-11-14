@@ -19,34 +19,23 @@
 
 extern plist openProc; 
 
-plist parse_list(plist p, int * fr, int * fw, int * bmode) {
-    *fr = *fw = -1;
-    *bmode = 0;
+plist parse_list(plist p, int * fr, int * fw, int *bmode) {
     plist res = NULL;
-    while (p && p->type != BASH) {
-        if (p->type == BASH) {
-            if (!strcmp(p->key, "&")) {
-                *bmode = 1;
-            } else if (!strcmp(p->key, ">>")) {
-                if (*fw != -1) {
-                    close(*fw);
-                }
+    while (p && (p->type == WORD || p->type == STREAM)) {
+        if (p->type == STREAM) {
+            if (!strcmp(p->key, ">>")) {
+                close(*fw);
                 *fw = open(p->next->key, O_WRONLY | O_APPEND | O_CREAT, S_IWRITE | S_IREAD);
                 p = p->next;
             } else if (!strcmp(p->key, ">")) {
-                if (*fw != -1) {
-                    close(*fw);
-                }
+                close(*fw);
                 *fw = open(p->next->key, O_WRONLY | O_CREAT | O_TRUNC, S_IWRITE | S_IREAD);
                 p = p->next;
             } else if (!strcmp(p->key, "<")) {
-                if (*fr != -1) {
-                    close(*fr);
-                }
+                close(*fr);
                 *fr = open(p->next->key, O_RDONLY);
                 p = p->next;
             }
-            
         } else {
             res = add_word(res, p->key, p->type);
         }
@@ -55,85 +44,103 @@ plist parse_list(plist p, int * fr, int * fw, int * bmode) {
     return res;
 }
 
-void runproc(plist p) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
+void runpipe(plist  p) { // A | B | C
     if (!p) {
-        return ;
+        return; 
     }
-    int fr = -1, fw = -1, bm = 0;
-    plist res = parse_list(p, &fr, &fw, &bm);
-    char ** argv = ltoa(res);
-    if (!strcmp(argv[0], "cd")) {
-        if (argv[1]) {
-            if (argv[2]) {
-                fprintf(stderr, "Djarvis Error:: Too many arguments for cd\n");
-                return ;
-            }
-            chdir(argv[1]);
-        } else {
-            chdir(getenv("HOME"));
+    int cntProc = 1;
+    plist end = p; 
+    while (end && end->type != BASH) {
+        if (end->type == PIPE) {
+            ++cntProc;
         }
-        delete_list(res);
-        free(argv);
-        return ;
+        end = end->next;
     }
-
-    int pid = fork();
-    if (pid < 0) {
-        fprintf(stderr, "can't fork\n");
-        delete_list(res);
-        free(argv);
-        if (fr != -1) {
-            close(fr);
-        }
-        if (fw != -1) {
-            close(fw);
-        }
-        return ;
-    } else if (pid == 0) {
-        if (fr != -1) {
-            dup2(fr, 0);
-            close(fr);
-        }
-        if (fw != -1) {
-            dup2(fw, 1);
-            close(fw);
-        }
-        if (bm) {
-            if (fr == -1) {
-                fr = open("/dev/null", O_RDONLY);
-                dup2(fr, 0);
-                close(fr);
-            }
-            if (fw == -1) {
-                fw = open("/dev/null", O_WRONLY);
-                dup2(fw, 1);
-                close(fw);
-            }
-        }
-        execvp(argv[0], argv);
-        fprintf(stderr, "%s:: Error\n", argv[0]);
-        exit(1);
+    int bm = end && end->type == AMP;
+    int * pids = (int*) malloc(cntProc * sizeof(*pids));
+    char ** commands = (char**) malloc(
+        cntProc * sizeof(*commands)
+    );
+    
+    int fd[2]; //curr proc write to fd1[1]
+    int fread; //curr proc read from fd0[0]
+    if (bm) {
+        fread = open("/dev/null", O_RDONLY);
     } else {
-        if (!bm) {
-            waitpid(pid, NULL, 0);
+        fread = dup(0);
+    }
+    for (int i = 0; i < cntProc; ++i) {
+        plist tmp = p;
+        while (tmp != end && tmp->type != PIPE) {
+            tmp = tmp -> next;
+        }
+        if (i + 1 < cntProc) {
+            pipe(fd);
         } else {
-            openProc = add_word(openProc, argv[0], pid);
+           fd[1] = dup(1); 
         }
-        if (fr != -1) {
-            close(fr);
+        
+        //run(p, int *fr, int *fd0, int *fd1);
+        plist res = parse_list(p, &fread, &fd[1], &bm);
+        char ** argv = ltoa(res);
+        if (!strcmp(argv[0], "cd")) {
+            if (argv[1]) {
+                if (argv[2]) {
+                    fprintf(stderr, "Djarvis Error:: Too many arguments for cd\n");
+                    return ;
+                }
+                chdir(argv[1]);
+            } else {
+                chdir(getenv("HOME"));
+            }
+            delete_list(res);
+            free(argv);
+            close(fread);
+            close(fd[1]);
+            fread = fd[0];
+            p = tmp->next;
+            continue; 
         }
-        if (fw != -1) {
-            close(fw);
+        int pid = fork();
+        if (pid < 0) {
+            exit(1);
+        } else if (pid == 0) {
+            dup2(fread, 0);
+            dup2(fd[1], 1);
+            close(fread);
+            close(fd[0]);
+            close(fd[1]);
+            execvp(*argv, argv);
+            fprintf(stderr, "%s:: Error\n", argv[0]);
+            exit(1);
         }
-        free(argv);
+        
+        pids[i] = pid;
+        commands[i] = p->key;
+        
+        close(fread);
+        close(fd[1]);
+    
+        fread = fd[0];
+        
         delete_list(res);
+        p = (tmp ? tmp->next : tmp);
+        free(argv);
     }
+    close(fread);
+    if (!bm) {
+        for (int i = 0; i < cntProc; ++i) {
+            waitpid(pids[i], NULL, 0);
+        }
+    } else {
+        for (int i = 0; i < cntProc; ++i) {
+            openProc = add_word(
+                    openProc, 
+                    commands[i], 
+                    pids[i]
+            );
+        }
+    }
+    free(pids);
+    free(commands);
 }
-
-/*void run_cmd(plist cmd) { // A | B | C &
-    plist tmp = cmd;
-    while (tmp) {
-        plist end = tmp;
-        while ()
-    }
-}*/
