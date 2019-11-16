@@ -18,6 +18,7 @@
 }*/
 
 extern plist openProc; 
+extern __sighandler_t sigh; 
 
 plist parse_list(plist p, int * fr, int * fw, int *bmode) {
     plist res = NULL;
@@ -98,13 +99,14 @@ void runpipe(plist  p) { // A | B | C
             close(fread);
             close(fd[1]);
             fread = fd[0];
-            p = tmp->next;
+            p = (tmp ? tmp->next : tmp);
             continue; 
         }
         int pid = fork();
         if (pid < 0) {
             exit(1);
         } else if (pid == 0) {
+            signal(SIGINT, sigh); 
             dup2(fread, 0);
             dup2(fd[1], 1);
             close(fread);

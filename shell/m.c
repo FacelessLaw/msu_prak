@@ -54,6 +54,8 @@ void sigint_listener(int sig) {
     //delete_all();
 }
 
+__sighandler_t sigh;
+
 int 
 main(int argc, char *argv[]) {
     int wasEOF = 0;
@@ -68,7 +70,7 @@ main(int argc, char *argv[]) {
             return 0;
         } else if (!strcmp(argv[1], RUN)) {
             plist cmd = parse_cmd(&wasEOF);
-            runproc(cmd);
+            runpipe(cmd);
             delete_list(cmd);
             return 0;
         } else if (!strcmp(argv[1], HELP)) {
@@ -89,7 +91,7 @@ main(int argc, char *argv[]) {
             return 0;
         }
     }
-    signal(SIGINT, SIG_IGN);
+    sigh = signal(SIGINT, sigint_listener);
     signal(SIGCHLD, sigchld_listener);
     wasEOF = 0;
     while (!wasEOF) {
