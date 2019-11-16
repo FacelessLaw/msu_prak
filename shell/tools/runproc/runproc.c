@@ -18,7 +18,6 @@
 }*/
 
 extern plist openProc; 
-extern __sighandler_t sigh; 
 
 plist parse_list(plist p, int * fr, int * fw, int *bmode) {
     plist res = NULL;
@@ -51,7 +50,7 @@ void runpipe(plist  p) { // A | B | C
     }
     int cntProc = 1;
     plist end = p; 
-    while (end && end->type != BASH) {
+    while (end && end->type != BASH && end->type != AMP) {
         if (end->type == PIPE) {
             ++cntProc;
         }
@@ -62,7 +61,7 @@ void runpipe(plist  p) { // A | B | C
     char ** commands = (char**) malloc(
         cntProc * sizeof(*commands)
     );
-    
+    int pid;
     int fd[2]; //curr proc write to fd1[1]
     int fread; //curr proc read from fd0[0]
     if (bm) {
@@ -78,10 +77,8 @@ void runpipe(plist  p) { // A | B | C
         if (i + 1 < cntProc) {
             pipe(fd);
         } else {
-           fd[1] = dup(1); 
+           fd[1] = dup(1);
         }
-        
-        //run(p, int *fr, int *fd0, int *fd1);
         plist res = parse_list(p, &fread, &fd[1], &bm);
         char ** argv = ltoa(res);
         if (!strcmp(argv[0], "cd")) {
@@ -102,11 +99,10 @@ void runpipe(plist  p) { // A | B | C
             p = (tmp ? tmp->next : tmp);
             continue; 
         }
-        int pid = fork();
+        pid = fork();
         if (pid < 0) {
             exit(1);
         } else if (pid == 0) {
-            signal(SIGINT, sigh); 
             dup2(fread, 0);
             dup2(fd[1], 1);
             close(fread);
@@ -135,6 +131,7 @@ void runpipe(plist  p) { // A | B | C
             waitpid(pids[i], NULL, 0);
         }
     } else {
+        printf("[%d] %d\n", 28, pid);
         for (int i = 0; i < cntProc; ++i) {
             openProc = add_word(
                     openProc, 
