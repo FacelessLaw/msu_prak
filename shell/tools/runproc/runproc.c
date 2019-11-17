@@ -9,6 +9,7 @@
 #include <signal.h>
 
 #include "../list/list.h"
+#include "../tree/tree.h"
 
 /*void parse_list(char *** argv, plist p, int * fread, int * fwrite, int * bmode) {
     while (p) {
@@ -44,6 +45,80 @@ plist parse_list(plist p, int * fr, int * fw, int *bmode) {
     }
     return res;
 }
+
+void runproc(plist p, int fr, int fw) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
+    if (!p) {
+        return ;
+    }
+    int bm = 0;
+    plist res = parse_list(p, &fr, &fw, &bm);
+    char ** argv = ltoa(res);
+    if (!strcmp(argv[0], "cd")) {
+        if (argv[1]) {
+            if (argv[2]) {
+                fprintf(stderr, "Djarvis Error:: Too many arguments for cd\n");
+                return ;
+            }
+            chdir(argv[1]);
+        } else {
+            chdir(getenv("HOME"));
+        }
+        delete_list(res);
+        free(argv);
+        return ;
+    }
+
+    int pid = fork();
+    if (pid < 0) {
+        fprintf(stderr, "can't fork\n");
+        delete_list(res);
+        free(argv);
+        if (fr != -1) {
+            close(fr);
+        }
+        if (fw != -1) {
+            close(fw);
+        }
+        return ;
+    } else if (pid == 0) {
+        if (fr != -1) {
+            dup2(fr, 0);
+            close(fr);
+        }
+        if (fw != -1) {
+            dup2(fw, 1);
+            close(fw);
+        }
+        if (bm) {
+            if (fr == -1) {
+                fr = open("/dev/null", O_RDONLY);
+                dup2(fr, 0);
+            }
+            if (fw == -1) {
+                fw = open("/dev/null", O_WRONLY);
+                dup2(fw, 1);
+            }
+        }
+        execvp(argv[0], argv);
+        fprintf(stderr, "%s:: Error\n", argv[0]);
+        exit(1);
+    } else {
+        if (!bm) {
+            waitpid(pid, NULL, 0);
+        } else {
+            openProc = add_word(openProc, argv[0], pid);
+        }
+        if (fr != -1) {
+            close(fr);
+        }
+        if (fw != -1) {
+            close(fw);
+        }
+        free(argv);
+        delete_list(res);
+    }
+}
+
 
 void runpipe(plist  p) { // A | B | C
     if (!p) {

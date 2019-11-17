@@ -99,7 +99,6 @@ ptree make_tree(plist p) {
             exit(1);
         }
     }
-    printf("DEBUUG\n");
     
     res->key = e1->next;
     e1->next = NULL;

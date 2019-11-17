@@ -98,23 +98,22 @@ main(int argc, char *argv[]) {
             return 0;
         } else if (!strcmp(argv[1], PARSE_INF)) {
             while (!wasEOF) {
-                printf("\n");
                 plist cmd = parse_cmd(&wasEOF);
+                ptree p = make_tree(cmd);
+                print_tree(p);
                 printf("\n");
-                print_list(cmd);
-                delete_list(cmd);
+                delete_tree(p);            
             }
             printf("\n");
             return 0;
         }
     }
     
-    printf("\n");
     plist cmd = parse_cmd(&wasEOF);
     ptree p = make_tree(cmd);
     print_tree(p);
-    //delete_tree(p);
     printf("\n");
-    //printf("PLEASE USAGE ARGS\n");
+    
+    delete_tree(p);
     return 0;
 }
