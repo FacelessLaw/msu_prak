@@ -44,7 +44,7 @@ void delete_all() {
         int pid = tmp->type;
         kill(pid, 9);
         waitpid(pid, &status, 0);
-        print_node(tmp);
+        print_killing(tmp);
         tmp = tmp->next;
     }
     delete_list(openProc);
@@ -70,9 +70,25 @@ main(int argc, char *argv[]) {
             printf("\n");
             return 0;
         } else if (!strcmp(argv[1], RUN)) {
-            plist cmd = parse_cmd(&wasEOF);
-            runpipe(cmd);
-            delete_list(cmd);
+            sigh = signal(SIGINT, sigint_listener);
+            signal(SIGCHLD, sigchld_listener);
+            wasEOF = 0;
+            while (!wasEOF) {
+                plist cmd = parse_cmd(&wasEOF);
+                //runproc(cmd);
+                runpipe(cmd);
+                delete_list(cmd);
+                if (closeProc) {
+                    print_loop(closeProc);
+                    delete_list(closeProc);
+                    closeProc = NULL;
+                }
+            }
+            printf("\n");
+            delete_all();
+            print_loop(openProc);
+            print_loop(closeProc);
+            delete_list(closeProc);                
             return 0;
         } else if (!strcmp(argv[1], HELP)) {
             printf("USAGE: ./m [-r, -p, -h]\n\n");
@@ -92,24 +108,13 @@ main(int argc, char *argv[]) {
             return 0;
         }
     }
-    sigh = signal(SIGINT, sigint_listener);
-    signal(SIGCHLD, sigchld_listener);
-    wasEOF = 0;
-    while (!wasEOF) {
-        plist cmd = parse_cmd(&wasEOF);
-        //runproc(cmd);
-        runpipe(cmd);
-        delete_list(cmd);
-        if (closeProc) {
-            print_loop(closeProc);
-            delete_list(closeProc);
-            closeProc = NULL;
-        }
-    }
+    
     printf("\n");
-    delete_all();
-    print_loop(openProc);
-    print_loop(closeProc);
-    delete_list(closeProc);        
+    plist cmd = parse_cmd(&wasEOF);
+    ptree p = make_tree(cmd);
+    print_tree(p);
+    //delete_tree(p);
+    printf("\n");
+    //printf("PLEASE USAGE ARGS\n");
     return 0;
 }

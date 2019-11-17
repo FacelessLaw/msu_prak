@@ -21,6 +21,8 @@ enum {
     END = 8, //, ;
 };
 
+void print_killing(plist root);
+
 void print_node(plist root);
 
 void print_loop(plist root);

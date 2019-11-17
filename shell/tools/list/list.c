@@ -74,19 +74,23 @@ void delete_list(plist root) {
     }
 }
 
-void print_node(plist root) {
+void print_killing(plist root) {
     printf("proc: [%d] was killed \t %s \n\n", root->type, root->key);
 }
 
 void print_loop(plist root) {
     while (root) {
         //printf("proc: [%d] was killed \t %s \n", root->type, root->key);
-        print_node(root);
+        print_killing(root);
         root = root->next;
     }
 }
 
-void print_list(plist root) {
+void print_node(plist root) {
+    if (!root) {
+        printf("print NULL ptr\n");
+        return ;
+    }
     const char * TYPES[9] = {
         "WORD", 
         "STREAM", 
@@ -98,8 +102,13 @@ void print_list(plist root) {
         "BRACKET_CLOSE", 
         "END",
     };
+    printf(" ---> %s <--- <%s> \n", root->key, TYPES[root->type]);
+}
+
+void print_list(plist root) {
+    
     while (root) {
-        printf(" ---> %s <--- <%s> \n", root->key, TYPES[root->type]);
+        print_node(root);
         root = root->next;
     }
 }

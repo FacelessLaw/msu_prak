@@ -9,3 +9,7 @@ struct tree {
 };
 
 ptree make_tree(plist p); 
+
+void print_tree(ptree t);
+
+void delete_tree(ptree t);
