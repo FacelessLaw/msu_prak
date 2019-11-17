@@ -1,5 +1,5 @@
 #ifndef H_LIST
-# define H_LIST
+#define H_LIST
 
 typedef struct list list;
 typedef list * plist;
@@ -14,7 +14,11 @@ enum {
     STREAM = 1, // >> < > &
     PIPE = 2, // >> < > &
     AMP = 3, // >> < > &
-    BASH = 4, // && ( ) || , ; 
+    LOGIC_AND = 4, // && ;
+    LOGIC_OR = 5, // || ;
+    BRACKET_OPEN = 6, // (
+    BRACKET_CLOSE = 7, // )
+    END = 8, //, ;
 };
 
 void print_node(plist root);

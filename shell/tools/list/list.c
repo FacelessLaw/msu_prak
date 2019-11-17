@@ -87,8 +87,19 @@ void print_loop(plist root) {
 }
 
 void print_list(plist root) {
+    const char * TYPES[9] = {
+        "WORD", 
+        "STREAM", 
+        "PIPE", 
+        "AMP", 
+        "LOGIC_AND", 
+        "LOGIC_OR", 
+        "BRACKET OPEN", 
+        "BRACKET_CLOSE", 
+        "END",
+    };
     while (root) {
-        printf(" ---> %s <--- <%d> \n", root->key, root->type);
+        printf(" ---> %s <--- <%s> \n", root->key, TYPES[root->type]);
         root = root->next;
     }
 }
@@ -96,12 +107,10 @@ void print_list(plist root) {
 int check_brackets(plist res) {
     int sum = 0;
     while (res) {
-        if (res->type == BASH) {
-            if (!strcmp(res->key, ")")) {
-                --sum;
-            } else if (!strcmp(res->key, "(")) {
-                ++sum;
-            }
+        if (res->type == BRACKET_OPEN) {
+            ++sum; 
+        } else if (res->type == BRACKET_CLOSE) {
+            --sum;
         }
         if (sum < 0) {
             return 0;

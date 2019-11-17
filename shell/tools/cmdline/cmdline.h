@@ -1,3 +1,5 @@
+#include "../list/list.h"
+
 char * read_word();
 /*
     Игнорирует первые пробельные символы.

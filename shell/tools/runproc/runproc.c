@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <signal.h>
+
 #include "../list/list.h"
 
 /*void parse_list(char *** argv, plist p, int * fread, int * fwrite, int * bmode) {
@@ -50,7 +51,7 @@ void runpipe(plist  p) { // A | B | C
     }
     int cntProc = 1;
     plist end = p; 
-    while (end && end->type != BASH && end->type != AMP) {
+    while (end && end->type != AMP) {
         if (end->type == PIPE) {
             ++cntProc;
         }

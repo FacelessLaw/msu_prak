@@ -4,10 +4,10 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-#include "tools/list/list.h"
 #include "tools/cmdline/cmdline.h"
 #include "tools/runproc/runproc.h"
 #include "tools/tree/tree.h"
+#include "tools/list/list.h"
 
 const char * PARSE = "-p\0";
 const char * PARSE_INF = "-pi\0";

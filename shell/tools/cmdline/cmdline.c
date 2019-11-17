@@ -109,8 +109,16 @@ mode_pair(
     int cmd_mode = STREAM; // & > < >>
     if (ch == endCh) {
         *ps = add_ch(*ps, endCh, plen, psz);
-        if (ch != '>') {
-            cmd_mode = BASH;
+        switch (endCh) {
+            case '|' : 
+                cmd_mode = LOGIC_OR; 
+                break; 
+            case '&' : 
+                cmd_mode = LOGIC_AND; 
+                break;
+            case '>':
+                cmd_mode = STREAM; 
+                break;  
         }
     } else if (endCh == '|') {
         cmd_mode = PIPE;
@@ -151,7 +159,22 @@ mode_pair(
         *plastWasSpace = 1;
     } else if (strchr(ONES_CHARS, ch)) {
         *ps = add_ch(*ps, ch, plen, psz);
-        add_word_to_res(presult, ps, plen, BASH);
+        int mode;
+        switch (ch) {
+            case '(' : 
+                mode = BRACKET_OPEN; 
+                break; 
+            case ')' : 
+                mode = BRACKET_CLOSE; 
+                break;
+            case '<' :
+                mode = STREAM;
+                break;
+            case ',' : case ';':
+                mode = END;
+                break;
+        }
+        add_word_to_res(presult, ps, plen, mode);
 
         *pmode = FREE;
         *pBreakFlag = 0;
@@ -211,11 +234,24 @@ mode_free(
             add_word_to_res(presult, ps, plen, WORD);
         }
         *ps = add_ch(*ps, ch, plen, psz);
-        int cmd_mode = BASH;
-        if (ch == '<') {
-            cmd_mode = STREAM;
+        int mode = STREAM;
+        
+        switch (ch) {
+            case '(' : 
+                mode = BRACKET_OPEN; 
+                break; 
+            case ')' : 
+                mode = BRACKET_CLOSE; 
+                break;
+            case '<' :
+                mode = STREAM;
+                break;
+            case ',' : case ';': 
+                mode = END;
+                break;
         }
-        add_word_to_res(presult, ps, plen, cmd_mode);
+
+        add_word_to_res(presult, ps, plen, mode);
         *plastWasSpace = 1;
     } else {
         *ps = add_ch(*ps, ch, plen, psz);
