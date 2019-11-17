@@ -1,0 +1,11 @@
+#include "../list/list.h"
+
+typedef struct tree * ptree; 
+
+struct tree {
+    plist key;
+    ptree lt;
+    ptree rt;
+};
+
+ptree make_tree(plist p); 

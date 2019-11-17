@@ -7,6 +7,7 @@
 #include "tools/list/list.h"
 #include "tools/cmdline/cmdline.h"
 #include "tools/runproc/runproc.h"
+#include "tools/tree/tree.h"
 
 const char * PARSE = "-p\0";
 const char * PARSE_INF = "-pi\0";

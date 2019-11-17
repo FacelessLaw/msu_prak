@@ -1,3 +1,6 @@
+#ifndef H_LIST
+# define H_LIST
+
 typedef struct list list;
 typedef list * plist;
 struct list {
@@ -60,3 +63,5 @@ int check_brackets(plist res);
 
 plist create_node(char *key, int type);
 /* create node with key=key, type=type, next=null */
+
+#endif
