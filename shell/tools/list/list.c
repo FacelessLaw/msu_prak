@@ -26,11 +26,13 @@ plist create_node(char *key, int type) {
     root->next = NULL;
     root->type = type;
     root->key = (char *) malloc(sizeof(*key) * (strlen(key) + 1));
+    
     strcpy(root->key, key);
     return root;
 }
 
 plist add_word(plist root, char *key, int type) {
+            
     if (!root) {
         return create_node(key, type);
     }
@@ -56,6 +58,7 @@ plist del_pid(plist root, int pid, plist * node) {
     while (sc) {
         if (sc->type == pid) {
             *node = sc;
+            (*node)->next = NULL ;
             fs->next = sc->next;
             return root;
         }

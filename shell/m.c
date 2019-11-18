@@ -4,10 +4,10 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include "tools/list/list.h"
+#include "tools/tree/tree.h"
 #include "tools/cmdline/cmdline.h"
 #include "tools/runproc/runproc.h"
-#include "tools/tree/tree.h"
-#include "tools/list/list.h"
 
 const char * PARSE = "-p\0";
 const char * PARSE_INF = "-pi\0";
@@ -108,12 +108,39 @@ main(int argc, char *argv[]) {
             return 0;
         }
     }
+    /*sigh = signal(SIGINT, sigint_listener);
+    signal(SIGCHLD, sigchld_listener);
+    wasEOF = 0;
     
-    plist cmd = parse_cmd(&wasEOF);
-    ptree p = make_tree(cmd);
-    print_tree(p);
+    while (!wasEOF) {
+        plist cmd = parse_cmd(&wasEOF);
+        ptree p = make_tree(cmd);
+        //printf("*******************************************\n");
+        runtree(p, -1, -1, 0);
+        delete_tree(p);    
+    }
     printf("\n");
-    
-    delete_tree(p);
+    */
+
+    sigh = signal(SIGINT, sigint_listener);
+    signal(SIGCHLD, sigchld_listener);
+    wasEOF = 0;
+    while (!wasEOF) {
+        plist cmd = parse_cmd(&wasEOF);
+        ptree p = make_tree(cmd);
+        runtree(p, -1, -1, 0);
+        delete_tree(p);
+        
+        if (closeProc) {
+            print_loop(closeProc);
+            delete_list(closeProc);
+            closeProc = NULL;
+        }
+    }
+    printf("\n");
+    delete_all();
+    print_loop(openProc);
+    print_loop(closeProc);
+    delete_list(closeProc);                
     return 0;
 }

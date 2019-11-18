@@ -1,6 +1,7 @@
 #include "../list/list.h"
 
-typedef struct tree * ptree; 
+typedef struct tree tree;
+typedef tree * ptree; 
 
 struct tree {
     plist key;

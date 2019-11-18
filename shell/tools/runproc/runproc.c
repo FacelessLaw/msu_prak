@@ -10,6 +10,7 @@
 
 #include "../list/list.h"
 #include "../tree/tree.h"
+#include "../runproc/runproc.h"
 
 /*void parse_list(char *** argv, plist p, int * fread, int * fwrite, int * bmode) {
     while (p) {
@@ -43,12 +44,16 @@ plist parse_list(plist p, int * fr, int * fw, int *bmode) {
         }
         p = p->next;
     }
+    *bmode = (p && p->type == AMP);
     return res;
 }
 
-void runproc(plist p, int fr, int fw) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
+int pids[200];
+int cntProc;
+
+int runproc(plist p, int fr, int fw, int pipe) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
     if (!p) {
-        return ;
+        return OK_CODE;
     }
     int bm = 0;
     plist res = parse_list(p, &fr, &fw, &bm);
@@ -57,7 +62,7 @@ void runproc(plist p, int fr, int fw) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
         if (argv[1]) {
             if (argv[2]) {
                 fprintf(stderr, "Djarvis Error:: Too many arguments for cd\n");
-                return ;
+                return ERROR_CODE;
             }
             chdir(argv[1]);
         } else {
@@ -65,7 +70,7 @@ void runproc(plist p, int fr, int fw) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
         }
         delete_list(res);
         free(argv);
-        return ;
+        return OK_CODE;
     }
 
     int pid = fork();
@@ -79,7 +84,7 @@ void runproc(plist p, int fr, int fw) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
         if (fw != -1) {
             close(fw);
         }
-        return ;
+        return ERROR_CODE;
     } else if (pid == 0) {
         if (fr != -1) {
             dup2(fr, 0);
@@ -93,32 +98,84 @@ void runproc(plist p, int fr, int fw) { //plist ./m >> 2 << 2 > 2 < 3 > 4 &
             if (fr == -1) {
                 fr = open("/dev/null", O_RDONLY);
                 dup2(fr, 0);
-            }
-            if (fw == -1) {
-                fw = open("/dev/null", O_WRONLY);
-                dup2(fw, 1);
+                close(fr);
             }
         }
         execvp(argv[0], argv);
         fprintf(stderr, "%s:: Error\n", argv[0]);
-        exit(1);
+        return ERROR_CODE;
     } else {
-        if (!bm) {
-            waitpid(pid, NULL, 0);
-        } else {
-            openProc = add_word(openProc, argv[0], pid);
-        }
         if (fr != -1) {
             close(fr);
         }
         if (fw != -1) {
             close(fw);
         }
+        int status = 0;
+        int resStatus = 0;
+        if (bm) {
+            openProc = add_word(openProc, argv[0], pid);
+            resStatus = OK_CODE;
+        } else if (pipe) {
+            pids[cntProc++] = pid;
+            resStatus = OK_CODE;
+        } else {
+            waitpid(pid, &status, 0);
+            resStatus = (WIFEXITED(status) && !WEXITSTATUS(status));
+        }
         free(argv);
         delete_list(res);
+        
+        return resStatus;
     }
 }
 
+int runtree(ptree p, int fr, int fw, int pip) {
+    if (!p) {
+        return OK_CODE;
+    }
+    if (!p->lt && !p->rt) {
+        return runproc(p->key, fr, fw, pip);
+    } else if (p->key->type == LOGIC_AND) {
+        if (runtree(p->lt, fr, fw, pip) == OK_CODE) {
+            if (runtree(p->rt, fr, fw, pip) == OK_CODE) {
+                return OK_CODE;
+            }
+        }
+        return  ERROR_CODE;
+    } else if (p->key->type == LOGIC_OR) {
+        if (runtree(p->lt, fr, fw, pip) == OK_CODE) {
+            return OK_CODE;
+        }
+        if (runtree(p->rt, fr, fw, pip) == OK_CODE) {
+            return OK_CODE;
+        }
+        return  ERROR_CODE;
+    } else if (p->key->type == PIPE) {
+        int fd[2];
+        pipe(fd);
+        if (!runtree(p->lt, fr, fd[1], 1)) {
+            printf("Strange Error with A in A | B...\n");
+            return ERROR_CODE;
+        } else if (!runtree(p->rt, fd[0], fw, pip)) {
+            printf("Strange Error with A in A | B...\n");
+            return ERROR_CODE;
+        }
+        if (!pip) {
+            int resStatus = OK_CODE;
+            for (int i = 0; i < cntProc; ++i) {
+                int status = 0;
+                waitpid(pids[i], &status, 0);
+                if (!WIFEXITED(status) || WEXITSTATUS(status)) {
+                    resStatus = ERROR_CODE;
+                }
+            }
+            cntProc = 0;
+            return resStatus;
+        }
+        return OK_CODE;
+    }
+}
 
 void runpipe(plist  p) { // A | B | C
     if (!p) {

@@ -26,7 +26,7 @@ for filename in $TEST_FILES; do
     echo "------------"
     echo ""
 
-    valgrind --log-file=vlog --leak-check=full -v cat $TEST_DIR/$filename | ./m -p > resFile
+    valgrind --log-file=vlog --leak-check=full -v cat $TEST_DIR/$filename | ./m > resFile
     echo "----------------"
     echo "| ResultBegin:: |"
     echo "----------------"

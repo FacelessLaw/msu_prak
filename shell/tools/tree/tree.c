@@ -26,17 +26,17 @@ void print_tree(ptree t) {
         return ;
     }
     
-    printf("Me:\n");
+    printf("\n\tMe:\n");
     print_tree_node(t);
     
-    printf("\nleft: \n");
+    printf("\n\tleft: \n");
     print_tree_node(t->lt);
     
     
-    printf("\nright: \n");
+    printf("\n\tright: \n");
     print_tree_node(t->rt);
     
-    printf("\n ============= \n");
+    printf("\n ============================ \n");
     print_tree(t->lt);
     print_tree(t->rt);
 }
@@ -81,7 +81,6 @@ ptree make_tree(plist p) {
             res->rt = NULL;
             return res;
         } else if (p->type == BRACKET_OPEN && end->next->type == BRACKET_CLOSE) {
-            printf("DEUUG\n");
             plist arg = p;
             p = p->next;
             arg->next = NULL;
