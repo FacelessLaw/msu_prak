@@ -1,0 +1,1 @@
+(ls -la || ls) | (grep sh) | grep gen
