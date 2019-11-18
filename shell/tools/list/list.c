@@ -83,7 +83,6 @@ void print_killing(plist root) {
 
 void print_loop(plist root) {
     while (root) {
-        //printf("proc: [%d] was killed \t %s \n", root->type, root->key);
         print_killing(root);
         root = root->next;
     }
@@ -109,7 +108,6 @@ void print_node(plist root) {
 }
 
 void print_list(plist root) {
-    
     while (root) {
         print_node(root);
         root = root->next;
@@ -131,10 +129,3 @@ int check_brackets(plist res) {
     }
     return sum == 0;
 }
-
-/*
-plist next_cmd(plist root) {
-    while (root && root->) {
-        
-    }
-} */

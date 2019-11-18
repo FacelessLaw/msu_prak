@@ -12,14 +12,6 @@
 #include "../tree/tree.h"
 #include "../runproc/runproc.h"
 
-/*void parse_list(char *** argv, plist p, int * fread, int * fwrite, int * bmode) {
-    while (p) {
-        if (strcmp(p->key, ">") || strcmp(p->key, ">>")) {
-            *fwrite = open("")
-        }
-    }
-}*/
-
 extern plist openProc; 
 
 plist parse_list(plist p, int * fr, int * fw, int *bmode) {
