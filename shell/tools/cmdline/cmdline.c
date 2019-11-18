@@ -94,6 +94,8 @@ void add_word_to_res(plist *presult, char **ps, int *plen, int type) {
     *ps[*plen] = 0;
 }
 
+int PRINT_FLAG = 1;
+
 void 
 mode_pair(
         int ch, 
@@ -126,9 +128,10 @@ mode_pair(
         cmd_mode = AMP;
     }
     add_word_to_res(presult, ps, plen, cmd_mode);
-    if (ch == '\n') {
+    if (ch == '\n' || ch == ';') {
         *pBreakFlag = 1;
         *pmode = FREE;
+        PRINT_FLAG = ch != ';';
         return;
     }
     if (ch == endCh) {
@@ -170,9 +173,6 @@ mode_pair(
             case '<' :
                 mode = STREAM;
                 break;
-            case ',' : case ';':
-                mode = END;
-                break;
         }
         add_word_to_res(presult, ps, plen, mode);
 
@@ -200,13 +200,14 @@ mode_free(
         int *pwasReading,
         plist *presult)
 {
-    if (isspace(ch)) {
+    if (isspace(ch) || ch == ';') {
         if (!*plastWasSpace) {
             add_word_to_res(presult, ps, plen, WORD);
             *plastWasSpace = 1;
         }
-        if (ch == '\n') {
+        if (ch == '\n' || ch == ';') {
             *pBreakFlag = 1;
+            PRINT_FLAG = ch != ';';
             return ;
         }
         return;
@@ -246,11 +247,7 @@ mode_free(
             case '<' :
                 mode = STREAM;
                 break;
-            case ',' : case ';': 
-                mode = END;
-                break;
         }
-
         add_word_to_res(presult, ps, plen, mode);
         *plastWasSpace = 1;
     } else {
@@ -263,7 +260,9 @@ mode_free(
 plist 
 parse_cmd(int * wasEOF) 
 {
-    printf("Djarvis ~> ");
+    if (PRINT_FLAG) {
+        printf("Djarvis ~> ");
+    }
     
     plist result = NULL;
     int sz = 2;
