@@ -17,11 +17,12 @@ const char * HELP = "-h\0";
 plist openProc = NULL;
 plist closeProc = NULL;
 
-void mv_proc(int pid) {
+void mv_proc(int pid, int status) {
     plist node = NULL;
     openProc = del_pid(openProc, pid, &node);
     if (node) {
         node->next = closeProc;
+        node->status = status;
         closeProc = node;
     }
 }
@@ -29,11 +30,11 @@ void mv_proc(int pid) {
 void 
 sigchld_listener(int sig) {
     int status;
-    int pid = waitpid(-1, NULL, WNOHANG);
+    int pid = waitpid(-1, &status, WNOHANG);
     if (!pid) {
         return ;
     }
-    mv_proc(pid);
+    mv_proc(pid, status);
     return ;
 }
 
