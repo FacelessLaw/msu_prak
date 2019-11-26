@@ -1,4 +1,4 @@
-#include <unistd.h>
+	#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -127,7 +127,7 @@ int runtree(ptree p, int fr, int fw, int pip) {
         return OK_CODE;
     }
     if (!p->lt && !p->rt) {
-        return runproc(p->key, fr, fw, pip);
+        return runproc(p->key, fr, fw, pip) == OK_CODE;
     } else if (p->key->type == LOGIC_AND) {
         if (runtree(p->lt, fr, fw, pip) == OK_CODE) {
             if (runtree(p->rt, fr, fw, pip) == OK_CODE) {
@@ -136,7 +136,7 @@ int runtree(ptree p, int fr, int fw, int pip) {
         }
         return  ERROR_CODE;
     } else if (p->key->type == LOGIC_OR) {
-        if (runtree(p->lt, fr, fw, pip) == OK_CODE) {
+		if (runtree(p->lt, fr, fw, pip) == OK_CODE) {
             return OK_CODE;
         }
         if (runtree(p->rt, fr, fw, pip) == OK_CODE) {
@@ -155,7 +155,8 @@ int runtree(ptree p, int fr, int fw, int pip) {
         }
         if (!pip) {
             int resStatus = OK_CODE;
-            for (int i = 0; i < cntProc; ++i) {
+            int i;
+            for (i = 0; i < cntProc; ++i) {
                 int status = 0;
                 waitpid(pids[i], &status, 0);
                 if (!WIFEXITED(status) || WEXITSTATUS(status)) {
@@ -194,7 +195,8 @@ void runpipe(plist  p) { // A | B | C
     } else {
         fread = dup(0);
     }
-    for (int i = 0; i < cntProc; ++i) {
+    int i;
+    for (i = 0; i < cntProc; ++i) {
         plist tmp = p;
         while (tmp != end && tmp->type != PIPE) {
             tmp = tmp -> next;
@@ -252,12 +254,12 @@ void runpipe(plist  p) { // A | B | C
     }
     close(fread);
     if (!bm) {
-        for (int i = 0; i < cntProc; ++i) {
+        for (i = 0; i < cntProc; ++i) {
             waitpid(pids[i], NULL, 0);
         }
     } else {
         printf("[%d] %d\n", 28, pid);
-        for (int i = 0; i < cntProc; ++i) {
+        for (i = 0; i < cntProc; ++i) {
             openProc = add_word(
                     openProc, 
                     commands[i], 
