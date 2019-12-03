@@ -18,14 +18,14 @@ struct {
 } Message;
 
 int main(void) {
-    //key_t key = ftok("/etc/password", MAGIC_NUM);
-    key_t key = MAGIC_NUM;
+    key_t key = ftok("/etc/password", MAGIC_NUM);
+    //key_t key = MAGIC_NUM;
     
     int msgid;
     printf("Connecting...\n");
     int trying = 0;
-    while ((msgid = msgget(key, 0666 | IPC_CREAT | IPC_EXCL)) == -1) {
-        sleep(3);
+    while ((msgid = msgget(key, 0)) == -1) {
+        sleep(5);
         if (4 == ++trying) {
             printf("Can't connect\n");
             exit(1);
@@ -33,13 +33,17 @@ int main(void) {
     }
     printf("READY TO Write...\n");
     char msg[4][MSG_SIZE] = {
-        "Hello\0", "How are you?\0", "Buy\0", "Q\0" 
+        "Hello\0", "How are you?\0", "Buy\0", "q\0" 
     };
     Message.pid = getpid();
-    for (int i = 0; i < 3; ++i) {
+    int i;
+    for (i = 0; i < 4; ++i) {
         strcpy(Message.s, msg[i]);
         Message.msgtype = 1;
+        printf("Sending..");
+        
         msgsnd(msgid, (struct msgbuf *)(&Message), sizeof(Message) - sizeof(long), 0);
+        printf("Done. \n");
         sleep(1);
     }
     return 0;
