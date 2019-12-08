@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     if (!n) {
         return 1;
     }
-    char ** av = (char **) malloc(sizeof (*av) *(n + 1));
+    char ** av = (char **) malloc(sizeof (*av) *(n + 2));
 
     int cBytes = sizeof(*av[0]) * MAX_NUM_SIZE;
     av[0] = (char *) malloc(cBytes);
@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
         memset(av[i], 0, cBytes);
         sprintf(av[i], "%d", i);
     }
+    av[n + 1] = NULL;
     execvp(av[0], av);
     for (int i = 0; i <= n; ++i) {
         free(av[i]);
