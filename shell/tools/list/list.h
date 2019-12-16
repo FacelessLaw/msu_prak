@@ -7,6 +7,7 @@ struct list {
     char * key;
     plist next;
     int type;
+    int status;
 };
 
 enum {

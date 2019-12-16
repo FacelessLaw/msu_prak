@@ -78,7 +78,11 @@ void delete_list(plist root) {
 }
 
 void print_killing(plist root) {
-    printf("proc: [%d] was killed \t %s \n\n", root->type, root->key);
+	if (WIFEXITED(root->status)) {
+		printf("proc: [%d] exited with status:[%d] \t %s \n\n", root->type, WEXITSTATUS(root->status), root->key);
+	} else {
+		printf("proc: [%d] was terminated with signal:[%d] \t %s \n\n", root->type, WTERMSIG(root->status), root->key);
+	}
 }
 
 void print_loop(plist root) {
