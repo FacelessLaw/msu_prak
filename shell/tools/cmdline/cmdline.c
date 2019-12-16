@@ -261,7 +261,7 @@ plist
 parse_cmd(int * wasEOF) 
 {
     if (PRINT_FLAG) {
-        printf("Djarvis ~> ");
+        printf("Cortana ~> ");
     }
     
     plist result = NULL;
@@ -335,15 +335,15 @@ parse_cmd(int * wasEOF)
         *wasEOF = 1;
     }
     if (mode == WAIT_ONES) {
-        fprintf(stderr, "Djarvis: Unexpected EOF during the search <\'>\n");
-        fprintf(stderr, "Djarvis: Syntax error \n");
+        fprintf(stderr, "Cortana: Unexpected EOF during the search <\'>\n");
+        fprintf(stderr, "Cortana: Syntax error \n");
         free(s);
         delete_list(result);
         return NULL;
     }
     if (mode == WAIT_PAIR) {
-        fprintf(stderr, "Djarvis: Unexpected EOF during the search <\">\n");
-        fprintf(stderr, "Djarvis: Syntax error \n");
+        fprintf(stderr, "Cortana: Unexpected EOF during the search <\">\n");
+        fprintf(stderr, "Cortana: Syntax error \n");
         free(s);
         delete_list(result);
         return NULL;
@@ -358,8 +358,8 @@ parse_cmd(int * wasEOF)
     }
     free(s);
     if (!check_brackets(result)) {
-        fprintf(stderr, "Djarvis: Brackets, bro..\n");
-        fprintf(stderr, "Djarvis: Syntax error \n");
+        fprintf(stderr, "Cortana: Brackets, bro..\n");
+        fprintf(stderr, "Cortana: Syntax error \n");
         
         delete_list(result);
         return NULL;
